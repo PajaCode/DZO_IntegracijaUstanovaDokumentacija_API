@@ -7,7 +7,21 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="8.0.0" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+    <PackageReference Include="SSH.NET" Version="2024.0.0" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.4.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Using Include="DZO_IntegracijaUstanovaDokumentacija_API.Managers" />
+    <Using Include="DZO_IntegracijaUstanovaDokumentacija_API.Models.DataTableObjects" />
+    <Using Include="DZO_IntegracijaUstanovaDokumentacija_API.Models.DataTransferObjects" />
+    <Using Include="DZO_IntegracijaUstanovaDokumentacija_API.Models.DomainClasses" />
+    <Using Include="Newtonsoft.Json" />
+    <Using Include="Renci.SshNet" />
+    <Using Include="System.Data" />
+    <Using Include="System.Reflection" />
   </ItemGroup>
 
 </Project>

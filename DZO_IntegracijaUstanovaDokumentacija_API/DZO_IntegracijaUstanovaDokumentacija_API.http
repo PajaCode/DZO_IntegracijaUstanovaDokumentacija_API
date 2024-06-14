@@ -1,6 +1,6 @@
 @DZO_IntegracijaUstanovaDokumentacija_API_HostAddress = http://localhost:5084
 
-GET {{DZO_IntegracijaUstanovaDokumentacija_API_HostAddress}}/weatherforecast/
+GET {{DZO_IntegracijaUstanovaDokumentacija_API_HostAddress}}/files/
 Accept: application/json
 
 ###
