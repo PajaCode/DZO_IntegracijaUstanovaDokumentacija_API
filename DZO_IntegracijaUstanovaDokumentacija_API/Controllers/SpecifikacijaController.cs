@@ -9,7 +9,6 @@ namespace DZO_IntegracijaUstanovaDokumentacija_API.Controllers
     [ApiController]
     public class SpecifikacijaController(VizimIntegracijaDb_TestContext db): ControllerBase
     {
-        private SpecifikacijaManager spec = new(db);
         private readonly string host = "192.168.20.40";
         private readonly string username = "test";
         private readonly string password = "G10b05BG";
