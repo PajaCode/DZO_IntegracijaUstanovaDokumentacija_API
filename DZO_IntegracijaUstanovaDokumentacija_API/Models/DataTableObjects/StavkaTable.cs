@@ -5,9 +5,9 @@
         public int IdRacuna {  get; set; }
         public int StavkaID { get; set; }
         public DateTime UslugaDatum { get; set; }
-        public int Popust { get; set; }
-        public int PunaCena { get; set; }
-        public int ZaIsplatu { get; set; }
+        public decimal Popust { get; set; }
+        public decimal PunaCena { get; set; }
+        public decimal ZaIsplatu { get; set; }
         public string Valuta { get; set; }
         public int UslugaID { get; set; }
         public int SARADNIKID { get; set; }

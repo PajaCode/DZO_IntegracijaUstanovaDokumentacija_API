@@ -33,6 +33,12 @@ public partial class DZOI_Vizim_Racun
     [Column(TypeName = "decimal(18, 2)")]
     public decimal? UkupanIznos { get; set; }
 
+    [Column(TypeName = "decimal(18, 2)")]
+    public decimal? Participacija { get; set; }
+
+    [Column(TypeName = "decimal(18, 2)")]
+    public decimal? Popust { get; set; }
+
     [StringLength(255)]
     public string RacunFajl { get; set; }
 

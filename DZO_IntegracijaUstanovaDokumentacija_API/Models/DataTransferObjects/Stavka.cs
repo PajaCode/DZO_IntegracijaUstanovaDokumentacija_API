@@ -4,10 +4,10 @@
     {
         public int StavkaID { get; set; }
         public DateTime UslugaDatum {  get; set; }
-        public int Popust { get; set; }
+        public decimal Popust { get; set; }
         public string Valuta { get; set; }
-        public int PunaCena { get; set; }
-        public int ZaUplatu { get; set; }
+        public decimal PunaCena { get; set; }
+        public decimal ZaUplatu { get; set; }
         public string UslugaNaziv { get; set; }
         public int SARADNIKID { get; set; }
         public string SARADNIKNAZIV { get; set; }

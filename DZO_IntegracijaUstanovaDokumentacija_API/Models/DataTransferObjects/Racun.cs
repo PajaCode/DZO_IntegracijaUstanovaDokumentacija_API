@@ -8,6 +8,8 @@
         public string UputBroj { get; set; }
         public string PacijentID { get; set; }
         public decimal IZNOSCLAIM { get; set; }
+        public decimal Participacija {  get; set; }
+        public decimal Popust {  get; set; }
         public List<Stavka> Stavka { get; set; }
         public string RacunFajl { get; set; }
         public string UputFajl { get; set; }

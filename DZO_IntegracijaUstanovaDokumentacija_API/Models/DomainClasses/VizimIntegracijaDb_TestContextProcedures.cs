@@ -88,22 +88,11 @@ namespace DZO_IntegracijaUstanovaDokumentacija_API.Models.DomainClasses
                 },
                 parameterreturnValue,
             };
-            try
-            {
-                var _ = await _context.SqlQueryAsync<DZOI_InsertSpecifikacijeRacunaFajlovaResult>("EXEC @returnValue = [dbo].[DZOI_InsertSpecifikacijeRacunaFajlova] @Specifikacije, @Racuni, @StavkeRacuna, @Fajlovi", sqlParameters, cancellationToken);
+            var _ = await _context.SqlQueryAsync<DZOI_InsertSpecifikacijeRacunaFajlovaResult>("EXEC @returnValue = [dbo].[DZOI_InsertSpecifikacijeRacunaFajlova] @Specifikacije, @Racuni, @StavkeRacuna, @Fajlovi", sqlParameters, cancellationToken);
 
-                returnValue?.SetValue(parameterreturnValue.Value);
-                return _;
+            returnValue?.SetValue(parameterreturnValue.Value);
 
-            }
-            catch (Exception ex)
-            {
-                return null;
-            }
-            
-
-
-
+            return _;
         }
     }
 }

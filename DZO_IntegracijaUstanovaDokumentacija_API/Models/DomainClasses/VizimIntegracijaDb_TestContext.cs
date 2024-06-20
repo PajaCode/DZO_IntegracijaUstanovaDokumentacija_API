@@ -19,6 +19,8 @@ public partial class VizimIntegracijaDb_TestContext : DbContext
 
     public virtual DbSet<DZOI_Vizim_Fajlovi> DZOI_Vizim_Fajlovi { get; set; }
 
+    public virtual DbSet<DZOI_Vizim_Json> DZOI_Vizim_Json { get; set; }
+
     public virtual DbSet<DZOI_Vizim_Racun> DZOI_Vizim_Racun { get; set; }
 
     public virtual DbSet<DZOI_Vizim_Specifikacija> DZOI_Vizim_Specifikacija { get; set; }
@@ -46,11 +48,18 @@ public partial class VizimIntegracijaDb_TestContext : DbContext
             entity.HasOne(d => d.Status).WithMany(p => p.DZOI_Vizim_Fajlovi).HasConstraintName("FK__DZOI_Vizi__Statu__300424B4");
         });
 
+        modelBuilder.Entity<DZOI_Vizim_Json>(entity =>
+        {
+            entity.Property(e => e.SistemskiDatum).HasDefaultValueSql("(getdate())");
+
+            entity.HasOne(d => d.Status).WithMany(p => p.DZOI_Vizim_Json).HasConstraintName("FK_DZOI_Vizim_Json_DZOI_Status");
+        });
+
         modelBuilder.Entity<DZOI_Vizim_Racun>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__DZOI_Viz__3214EC074CE26C6E");
+            entity.HasKey(e => e.Id).HasName("PK__DZOI_Viz__3214EC079B2DB579");
 
-            entity.HasOne(d => d.IdSpecifikacijeNavigation).WithMany(p => p.DZOI_Vizim_Racun).HasConstraintName("FK__DZOI_Vizi__IdSpe__29572725");
+            entity.HasOne(d => d.IdSpecifikacijeNavigation).WithMany(p => p.DZOI_Vizim_Racun).HasConstraintName("FK__DZOI_Vizi__IdSpe__4AB81AF0");
         });
 
         modelBuilder.Entity<DZOI_Vizim_Specifikacija>(entity =>
@@ -62,9 +71,9 @@ public partial class VizimIntegracijaDb_TestContext : DbContext
 
         modelBuilder.Entity<DZOI_Vizim_StavkeRacuna>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__DZOI_Viz__3214EC0721A71FB7");
+            entity.HasKey(e => e.Id).HasName("PK__DZOI_Viz__3214EC079A0EC4B1");
 
-            entity.HasOne(d => d.IdRacunaNavigation).WithMany(p => p.DZOI_Vizim_StavkeRacuna).HasConstraintName("FK__DZOI_Vizi__IdRac__2C3393D0");
+            entity.HasOne(d => d.IdRacunaNavigation).WithMany(p => p.DZOI_Vizim_StavkeRacuna).HasConstraintName("FK__DZOI_Vizi__IdRac__4D94879B");
         });
 
         OnModelCreatingGeneratedProcedures(modelBuilder);

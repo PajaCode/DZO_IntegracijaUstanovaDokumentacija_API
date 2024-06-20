@@ -2,6 +2,8 @@
 using DZO_IntegracijaUstanovaDokumentacija_API.Models.DomainClasses;
 using HR_API.Helpers;
 using Microsoft.AspNetCore.Mvc;
+using System.Diagnostics;
+using System.Net.Mail;
 
 namespace DZO_IntegracijaUstanovaDokumentacija_API.Controllers
 {
@@ -12,7 +14,7 @@ namespace DZO_IntegracijaUstanovaDokumentacija_API.Controllers
         private readonly string host = "192.168.20.40";
         private readonly string username = "test";
         private readonly string password = "G10b05BG";
-        private readonly string remotePath = "/home/test";
+        private readonly string remotePath = "/home/test/";
 
         [HttpGet("files")]
         public async Task<IActionResult> GetFilesAsync()
@@ -23,7 +25,7 @@ namespace DZO_IntegracijaUstanovaDokumentacija_API.Controllers
                 sftp.Connect();
 
                 var files = sftp.ListDirectory(remotePath)
-                                .Where(f => f.IsRegularFile && f.Name.EndsWith(".json"))
+                                .Where(f => f.IsRegularFile && (f.Name.EndsWith(".json") || f.Name.EndsWith(".JSON")))
                                 .Select(f => new { f.Name, f.FullName, f.LastWriteTime })
                                 .Take(5)
                                 .ToList();
@@ -44,6 +46,13 @@ namespace DZO_IntegracijaUstanovaDokumentacija_API.Controllers
                         {
                             string jsonContent = reader.ReadToEnd();
                             FileJson jsonObject = JsonConvert.DeserializeObject<FileJson>(jsonContent);
+                            db.DZOI_Vizim_Json.Add(new DZOI_Vizim_Json
+                            {
+                                nazivJson = file.Name,
+                                StatusId = 1,
+                                SistemskiDatum = DateTime.Now
+                            });
+                            await db.SaveChangesAsync();
                             jsonFileList.Add(jsonObject);
                         }
                         
@@ -83,6 +92,8 @@ namespace DZO_IntegracijaUstanovaDokumentacija_API.Controllers
                             UputBroj=rac.UputBroj,
                             BrojKartice = rac.PacijentID,
                             UkupanIznos=rac.IZNOSCLAIM,
+                            Participacija=rac.Participacija,
+                            Popust = rac.Popust,
                             RacunFajl=rac.RacunFajl,
                             UputFajl=rac.UputFajl,
                         };
@@ -136,5 +147,60 @@ namespace DZO_IntegracijaUstanovaDokumentacija_API.Controllers
                 return StatusCode(500, $"Error: {ex.Message}");
             }
         }
+
+        [HttpGet("folder")]
+        public IActionResult CreateFolderAndMoveFiles()
+        {
+            try
+            {
+                IQueryable<Folderi> upit = db.DZOI_Vizim_Racun
+                             .Join(db.DZOI_Vizim_Specifikacija,
+                                 rac => rac.IdSpecifikacije,
+                                 spec => spec.Id,
+                                 (rac, spec) => new { rac, spec })
+                             .Where(rs => rs.spec.StatusId == 1)
+                             .Select(rs => new Folderi
+                             {
+                                Uput= rs.rac.UputBroj,
+                                SpecId= rs.spec.Id
+                             });
+
+                using SftpClient sftp = new(host, username, password);
+                string newFolderPath = "/home/vizim/testFolder";
+                sftp.Connect();
+                if (!sftp.Exists(newFolderPath))
+                {
+                    sftp.CreateDirectory(newFolderPath);
+                }
+                var files = sftp.ListDirectory(remotePath);
+
+                // Copy each file to the new folder
+                foreach (var file in files)
+                {
+                    if (!file.IsDirectory && !file.IsSymbolicLink)
+                    {
+                        string sourceFilePath = remotePath + file.Name;
+                        string destinationFilePath = newFolderPath + "/" + file.Name;
+
+                        using (Stream fileStream = sftp.OpenRead(sourceFilePath))
+                        using (Stream newFileStream = sftp.Create(destinationFilePath))
+                        {
+                            fileStream.CopyTo(newFileStream);
+                        }
+                    }
+                }
+
+                sftp.Disconnect();
+
+                return Ok(new { message = "Files copied successfully." });
+            }
+            catch(Exception ex)
+            {
+                return StatusCode(500, new { message = "An error occurred while creating the folder.", error = ex.Message });
+            }
+            
+        }
+
+
     }
 }

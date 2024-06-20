@@ -28,6 +28,10 @@
          "ObjectType": 0
       },
       {
+         "Name": "[dbo].[DZOI_Vizim_Json]",
+         "ObjectType": 0
+      },
+      {
          "Name": "[dbo].[DZOI_Vizim_Racun]",
          "ObjectType": 0
       },

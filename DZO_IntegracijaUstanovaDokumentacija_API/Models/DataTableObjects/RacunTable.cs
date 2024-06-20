@@ -9,6 +9,8 @@
         public string UputBroj { get; set; }
         public string BrojKartice { get; set; }
         public decimal UkupanIznos { get; set; }
+        public decimal? Participacija { get; set; }
+        public decimal? Popust { get; set; }
         public string RacunFajl { get; set; }
         public string UputFajl { get; set; }
     }
