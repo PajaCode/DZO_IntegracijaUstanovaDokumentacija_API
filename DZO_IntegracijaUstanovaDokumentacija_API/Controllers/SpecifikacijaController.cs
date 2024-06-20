@@ -2,6 +2,7 @@
 using DZO_IntegracijaUstanovaDokumentacija_API.Models.DomainClasses;
 using HR_API.Helpers;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using System.Diagnostics;
 using System.Net.Mail;
 
@@ -45,19 +46,46 @@ namespace DZO_IntegracijaUstanovaDokumentacija_API.Controllers
                         using (var reader = new StreamReader(stream))
                         {
                             string jsonContent = reader.ReadToEnd();
-                            FileJson jsonObject = JsonConvert.DeserializeObject<FileJson>(jsonContent);
-                            db.DZOI_Vizim_Json.Add(new DZOI_Vizim_Json
+
+                            // Provera da li fajl već postoji u bazi
+                            var existingEntry = db.DZOI_Vizim_Json.FirstOrDefault(x => x.nazivJson == file.Name);
+
+                            if (existingEntry == null)
                             {
-                                nazivJson = file.Name,
-                                StatusId = 1,
-                                SistemskiDatum = DateTime.Now
-                            });
-                            await db.SaveChangesAsync();
-                            jsonFileList.Add(jsonObject);
+                                try
+                                {
+                                    FileJson jsonObject = JsonConvert.DeserializeObject<FileJson>(jsonContent);
+                                    jsonFileList.Add(jsonObject);
+                                }
+                                catch (JsonException)
+                                {
+                                    // Upisivanje u bazu sa statusom 3
+                                    db.DZOI_Vizim_Json.Add(new DZOI_Vizim_Json
+                                    {
+                                        nazivJson = file.Name,
+                                        StatusId = 3,
+                                        SistemskiDatum = DateTime.Now
+                                    });
+                                    await db.SaveChangesAsync();
+                                    continue;
+                                }
+
+                                // Upisivanje u bazu sa statusom 1
+                                db.DZOI_Vizim_Json.Add(new DZOI_Vizim_Json
+                                {
+                                    nazivJson = file.Name,
+                                    StatusId = 1,
+                                    SistemskiDatum = DateTime.Now
+                                });
+                                await db.SaveChangesAsync();
+                            }
+                            else
+                            {
+                                continue;
+                            }
                         }
-                        
-                    } 
-                   
+                    }
+
                 }
 
                 sftp.Disconnect();
@@ -166,29 +194,34 @@ namespace DZO_IntegracijaUstanovaDokumentacija_API.Controllers
                              });
 
                 using SftpClient sftp = new(host, username, password);
-                string newFolderPath = "/home/vizim/testFolder";
+                
                 sftp.Connect();
-                if (!sftp.Exists(newFolderPath))
+                foreach(Folderi folder in upit)
                 {
-                    sftp.CreateDirectory(newFolderPath);
-                }
-                var files = sftp.ListDirectory(remotePath);
-
-                // Copy each file to the new folder
-                foreach (var file in files)
-                {
-                    if (!file.IsDirectory && !file.IsSymbolicLink)
+                    string newFolderPath = remotePath+folder.Uput;
+                    if (!sftp.Exists(newFolderPath))
                     {
-                        string sourceFilePath = remotePath + file.Name;
-                        string destinationFilePath = newFolderPath + "/" + file.Name;
-
-                        using (Stream fileStream = sftp.OpenRead(sourceFilePath))
-                        using (Stream newFileStream = sftp.Create(destinationFilePath))
-                        {
-                            fileStream.CopyTo(newFileStream);
-                        }
+                        sftp.CreateDirectory(newFolderPath);
                     }
                 }
+                
+                //var files = sftp.ListDirectory(remotePath);
+
+                // Copy each file to the new folder
+                //foreach (var file in files)
+                //{
+                //    if (!file.IsDirectory && !file.IsSymbolicLink)
+                //    {
+                //        string sourceFilePath = remotePath + file.Name;
+                //        string destinationFilePath = newFolderPath + "/" + file.Name;
+
+                //        using (Stream fileStream = sftp.OpenRead(sourceFilePath))
+                //        using (Stream newFileStream = sftp.Create(destinationFilePath))
+                //        {
+                //            fileStream.CopyTo(newFileStream);
+                //        }
+                //    }
+                //}
 
                 sftp.Disconnect();
 
