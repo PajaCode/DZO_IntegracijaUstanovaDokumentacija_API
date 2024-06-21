@@ -29,7 +29,6 @@ namespace DZO_IntegracijaUstanovaDokumentacija_API.Controllers
                                 .Where(f => f.IsRegularFile && (f.Name.EndsWith(".json") || f.Name.EndsWith(".JSON")))
                                 .Select(f => new FileDetail
                                 { Name = f.Name, FullName=f.FullName, LastWriteTime= f.LastWriteTime })
-                                .Take(5)
                                 .ToList();
 
                 List<InsertedFile> fileNames = specifikacijaManager.Files(files);
@@ -72,7 +71,7 @@ namespace DZO_IntegracijaUstanovaDokumentacija_API.Controllers
                         }
                         else
                         {
-                            await specifikacijaManager.InsertPodatakaIzJsona(jsonObject,file.IdJson);
+                            await specifikacijaManager.InsertPodatakaIzJsona(jsonObject,file.Idj);
                         }
                         
                     }
