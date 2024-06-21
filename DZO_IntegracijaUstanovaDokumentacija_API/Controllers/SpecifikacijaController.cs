@@ -1,10 +1,7 @@
 ﻿
-using DZO_IntegracijaUstanovaDokumentacija_API.Models.DomainClasses;
 using HR_API.Helpers;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using System.Diagnostics;
-using System.Net.Mail;
+
 
 namespace DZO_IntegracijaUstanovaDokumentacija_API.Controllers
 {
@@ -16,6 +13,7 @@ namespace DZO_IntegracijaUstanovaDokumentacija_API.Controllers
         private readonly string username = "test";
         private readonly string password = "G10b05BG";
         private readonly string remotePath = "/home/test/";
+        private readonly SpecifikacijaManager specifikacijaManager = new(db);
 
         [HttpGet("files")]
         public async Task<IActionResult> GetFilesAsync()
@@ -23,21 +21,27 @@ namespace DZO_IntegracijaUstanovaDokumentacija_API.Controllers
             try
             {
                 using SftpClient sftp = new(host, username, password);
+                //sftp.Timeout
+
                 sftp.Connect();
 
-                var files = sftp.ListDirectory(remotePath)
+                List<FileDetail> files = sftp.ListDirectory(remotePath)
                                 .Where(f => f.IsRegularFile && (f.Name.EndsWith(".json") || f.Name.EndsWith(".JSON")))
-                                .Select(f => new { f.Name, f.FullName, f.LastWriteTime })
+                                .Select(f => new FileDetail
+                                { Name = f.Name, FullName=f.FullName, LastWriteTime= f.LastWriteTime })
                                 .Take(5)
                                 .ToList();
 
-                List<FileJson> jsonFileList = [];
+                List<InsertedFile> fileNames = specifikacijaManager.Files(files);
 
-                foreach (var file in files)
+
+                FileJson jsonObject = new();
+
+
+                foreach (InsertedFile file in fileNames)
                 {
                     string sourceFilePath = file.FullName;
 
-                    // Čitanje sadržaja JSON fajla direktno iz memorije
                     using (MemoryStream stream = new MemoryStream())
                     {
                         sftp.DownloadFile(sourceFilePath, stream);
@@ -47,126 +51,40 @@ namespace DZO_IntegracijaUstanovaDokumentacija_API.Controllers
                         {
                             string jsonContent = reader.ReadToEnd();
 
-                            // Provera da li fajl već postoji u bazi
-                            var existingEntry = db.DZOI_Vizim_Json.FirstOrDefault(x => x.nazivJson == file.Name);
-
-                            if (existingEntry == null)
+                            try
                             {
-                                try
-                                {
-                                    FileJson jsonObject = JsonConvert.DeserializeObject<FileJson>(jsonContent);
-                                    jsonFileList.Add(jsonObject);
-                                }
-                                catch (JsonException)
-                                {
-                                    // Upisivanje u bazu sa statusom 3
-                                    db.DZOI_Vizim_Json.Add(new DZOI_Vizim_Json
-                                    {
-                                        nazivJson = file.Name,
-                                        StatusId = 3,
-                                        SistemskiDatum = DateTime.Now
-                                    });
-                                    await db.SaveChangesAsync();
-                                    continue;
-                                }
-
-                                // Upisivanje u bazu sa statusom 1
-                                db.DZOI_Vizim_Json.Add(new DZOI_Vizim_Json
-                                {
-                                    nazivJson = file.Name,
-                                    StatusId = 1,
-                                    SistemskiDatum = DateTime.Now
-                                });
-                                await db.SaveChangesAsync();
+                                jsonObject = specifikacijaManager.ReadJson(jsonContent);
                             }
-                            else
+                            catch(JsonException ex)
                             {
+                                specifikacijaManager.LogError(file.IdJson, ex.Message);
                                 continue;
                             }
+                           
                         }
+                    }
+                    try
+                    {
+                        DZOI_Vizim_Json jSon = db.DZOI_Vizim_Json.Where(j => j.Id == file.IdJson).FirstOrDefault();
+                        if(jSon.StatusId == 3)
+                        {
+                            continue;
+                        }
+                        else
+                        {
+                            await specifikacijaManager.InsertPodatakaIzJsona(jsonObject,file.IdJson);
+                        }
+                        
+                    }
+                    catch (Exception ex)
+                    {
+                        specifikacijaManager.LogError(file.IdJson, ex.Message);
+                        continue;
                     }
 
                 }
 
-                sftp.Disconnect();
-
-                DataTable specifikacija = new();
-                DataTable racun=new();
-                DataTable stavka=new();
-                DataTable fajl=new();
-                foreach (FileJson file in jsonFileList)
-                {
-                    string opisJson=JsonConvert.SerializeObject(file);
-                    ZaglavljeTable zaglavljeTable = new ZaglavljeTable
-                    {
-                        FakturaId=file.Zaglavlje.FakturaId,
-                        FakturaBroj=file.Zaglavlje.FakturaBroj,
-                        UstanovaIDMG=file.Zaglavlje.UstanovaIDMG,
-                        Datum=file.Zaglavlje.Datum,
-                        OpisJson=opisJson
-                    };
-                    specifikacija = FormatTypeHelper.ToDataTableFromObject(zaglavljeTable);
-
-                    List<RacunTable> racuni = [];
-                    List<StavkaTable> stavke = [];
-                    List<FajloviTable> fajlovi = [];
-                    foreach(Racun rac in file.Racun)
-                    {
-                        RacunTable racunTable = new RacunTable
-                        {
-                            RacunID = rac.RacunID,
-                            RacunDatum=rac.RacunDatum,
-                            RacunBrojFiskala=rac.RacunBrojFiskala,
-                            UputBroj=rac.UputBroj,
-                            BrojKartice = rac.PacijentID,
-                            UkupanIznos=rac.IZNOSCLAIM,
-                            Participacija=rac.Participacija,
-                            Popust = rac.Popust,
-                            RacunFajl=rac.RacunFajl,
-                            UputFajl=rac.UputFajl,
-                        };
-                        racuni.Add( racunTable );
-
-                        foreach(Stavka stav in rac.Stavka)
-                        {
-                            StavkaTable stavkaTable = new StavkaTable
-                            {
-                                StavkaID=stav.StavkaID,
-                                UslugaDatum=stav.UslugaDatum,
-                                Popust=stav.Popust,
-                                PunaCena=stav.PunaCena,
-                                ZaIsplatu=stav.ZaUplatu,
-                                Valuta=stav.Valuta,
-                                UslugaID=stav.UslugaID,
-                                SARADNIKID=stav.SARADNIKID,
-                                SARADNIKNAZIV=stav.SARADNIKNAZIV,
-                                LabNalazFajl=stav.LabNalazFajl,
-                                NalazFajl= stav.NalazFajl,
-                                Nalazsistematski=stav.Nalazsistematski,
-                                UslugaNaziv=stav.UslugaNaziv,
-                                RacunId=rac.RacunID
-                            };
-                            stavke.Add(stavkaTable);
-                            if (!String.IsNullOrEmpty(stav.Attachments))
-                            {
-                                string[] attachments = stav.Attachments.Split(";");
-                                foreach (string attachment in attachments)
-                                {
-                                    FajloviTable fajloviTable = new FajloviTable
-                                    {
-                                        NazivFajla = attachment
-                                    };
-                                    fajlovi.Add(fajloviTable);
-                                }
-                            }
-                        }
-
-                    }
-                    racun=FormatTypeHelper.ToDataTableFromList( racuni );
-                    stavka = FormatTypeHelper.ToDataTableFromList(stavke);
-                    fajl= FormatTypeHelper.ToDataTableFromList(fajlovi);
-                    var promena= await db.Procedures.DZOI_InsertSpecifikacijeRacunaFajlovaAsync(specifikacija, racun, stavka, fajl);
-                }
+                sftp.Disconnect();              
 
                 return Ok("Dobar posao odrađen");
             }

@@ -4,7 +4,7 @@
     {
         public int IdRacuna {  get; set; }
         public int StavkaID { get; set; }
-        public DateTime UslugaDatum { get; set; }
+        public DateTime? UslugaDatum { get; set; }
         public decimal Popust { get; set; }
         public decimal PunaCena { get; set; }
         public decimal ZaIsplatu { get; set; }

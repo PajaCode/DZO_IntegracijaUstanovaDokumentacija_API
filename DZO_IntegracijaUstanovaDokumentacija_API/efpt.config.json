@@ -24,6 +24,10 @@
          "ObjectType": 0
       },
       {
+         "Name": "[dbo].[DZOI_Vizim_ErrorJson]",
+         "ObjectType": 0
+      },
+      {
          "Name": "[dbo].[DZOI_Vizim_Fajlovi]",
          "ObjectType": 0
       },

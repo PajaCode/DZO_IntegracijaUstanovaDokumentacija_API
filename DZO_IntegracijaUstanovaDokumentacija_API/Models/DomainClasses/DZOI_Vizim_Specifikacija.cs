@@ -28,11 +28,17 @@ public partial class DZOI_Vizim_Specifikacija
 
     public int? StatusId { get; set; }
 
+    public int? IdJson { get; set; }
+
     [InverseProperty("IdSpecifikacijeNavigation")]
     public virtual ICollection<DZOI_Vizim_Fajlovi> DZOI_Vizim_Fajlovi { get; set; } = new List<DZOI_Vizim_Fajlovi>();
 
     [InverseProperty("IdSpecifikacijeNavigation")]
     public virtual ICollection<DZOI_Vizim_Racun> DZOI_Vizim_Racun { get; set; } = new List<DZOI_Vizim_Racun>();
+
+    [ForeignKey("IdJson")]
+    [InverseProperty("DZOI_Vizim_Specifikacija")]
+    public virtual DZOI_Vizim_Json IdJsonNavigation { get; set; }
 
     [ForeignKey("StatusId")]
     [InverseProperty("DZOI_Vizim_Specifikacija")]

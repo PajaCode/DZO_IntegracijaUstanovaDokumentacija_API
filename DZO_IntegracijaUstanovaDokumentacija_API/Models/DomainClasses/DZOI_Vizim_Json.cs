@@ -21,6 +21,12 @@ public partial class DZOI_Vizim_Json
     [Column(TypeName = "datetime")]
     public DateTime? SistemskiDatum { get; set; }
 
+    [InverseProperty("IdJsonNavigation")]
+    public virtual ICollection<DZOI_Vizim_ErrorJson> DZOI_Vizim_ErrorJson { get; set; } = new List<DZOI_Vizim_ErrorJson>();
+
+    [InverseProperty("IdJsonNavigation")]
+    public virtual ICollection<DZOI_Vizim_Specifikacija> DZOI_Vizim_Specifikacija { get; set; } = new List<DZOI_Vizim_Specifikacija>();
+
     [ForeignKey("StatusId")]
     [InverseProperty("DZOI_Vizim_Json")]
     public virtual DZOI_Status Status { get; set; }

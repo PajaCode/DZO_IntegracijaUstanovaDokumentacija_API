@@ -17,6 +17,8 @@ public partial class VizimIntegracijaDb_TestContext : DbContext
 
     public virtual DbSet<DZOI_Status> DZOI_Status { get; set; }
 
+    public virtual DbSet<DZOI_Vizim_ErrorJson> DZOI_Vizim_ErrorJson { get; set; }
+
     public virtual DbSet<DZOI_Vizim_Fajlovi> DZOI_Vizim_Fajlovi { get; set; }
 
     public virtual DbSet<DZOI_Vizim_Json> DZOI_Vizim_Json { get; set; }
@@ -37,6 +39,13 @@ public partial class VizimIntegracijaDb_TestContext : DbContext
         modelBuilder.Entity<DZOI_Status>(entity =>
         {
             entity.HasKey(e => e.Id).HasName("PK__DZOI_Sta__3214EC07A3CBC4F5");
+        });
+
+        modelBuilder.Entity<DZOI_Vizim_ErrorJson>(entity =>
+        {
+            entity.Property(e => e.SistemskiDatum).HasDefaultValueSql("(getdate())");
+
+            entity.HasOne(d => d.IdJsonNavigation).WithMany(p => p.DZOI_Vizim_ErrorJson).HasConstraintName("FK_DZOI_Vizim_ErrorJson_DZOI_Vizim_Json");
         });
 
         modelBuilder.Entity<DZOI_Vizim_Fajlovi>(entity =>
@@ -65,6 +74,8 @@ public partial class VizimIntegracijaDb_TestContext : DbContext
         modelBuilder.Entity<DZOI_Vizim_Specifikacija>(entity =>
         {
             entity.HasKey(e => e.Id).HasName("PK__DZOI_Viz__3214EC070A8FF919");
+
+            entity.HasOne(d => d.IdJsonNavigation).WithMany(p => p.DZOI_Vizim_Specifikacija).HasConstraintName("FK_DZOI_Vizim_Specifikacija_DZOI_Vizim_Json");
 
             entity.HasOne(d => d.Status).WithMany(p => p.DZOI_Vizim_Specifikacija).HasConstraintName("FK__DZOI_Vizi__Statu__267ABA7A");
         });

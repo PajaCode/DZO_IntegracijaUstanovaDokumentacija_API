@@ -2,6 +2,7 @@
 {
     public class ZaglavljeTable
     {
+        public int IdJson {  get; set; }
         public string FakturaId { get; set; }
         public string FakturaBroj { get; set; }
         public int UstanovaIDMG { get; set; }
