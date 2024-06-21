@@ -56,7 +56,7 @@ namespace DZO_IntegracijaUstanovaDokumentacija_API.Controllers
                             }
                             catch(JsonException ex)
                             {
-                                specifikacijaManager.LogError(file.IdJson, ex.Message);
+                                specifikacijaManager.LogError(file.IdJson, ex.Message + "metoda ReadJson - parsiranje JSON-a");
                                 continue;
                             }
                            
@@ -71,13 +71,13 @@ namespace DZO_IntegracijaUstanovaDokumentacija_API.Controllers
                         }
                         else
                         {
-                            await specifikacijaManager.InsertPodatakaIzJsona(jsonObject,file.Idj);
+                            await specifikacijaManager.InsertPodatakaIzJsona(jsonObject,file.IdJson);
                         }
                         
                     }
                     catch (Exception ex)
                     {
-                        specifikacijaManager.LogError(file.IdJson, ex.Message);
+                        specifikacijaManager.LogError(file.IdJson, ex.Message + "- procedura DZOI_InsertSpecifikacijeRacunaFajlova");
                         continue;
                     }
 
