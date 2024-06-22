@@ -1,35 +1,45 @@
-﻿using DZO_IntegracijaUstanovaDokumentacija_API.Models.DataTransferObjects;
+﻿using DZO_IntegracijaUstanovaDokumentacija_API.Helpers;
+using DZO_IntegracijaUstanovaDokumentacija_API.Models.DataTransferObjects;
 using DZO_IntegracijaUstanovaDokumentacija_API.Models.DomainClasses;
 using HR_API.Helpers;
+using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.AspNetCore.Mvc;
 using System.Net.Http.Json;
 
 namespace DZO_IntegracijaUstanovaDokumentacija_API.Managers
 {
-    public class SpecifikacijaManager(VizimIntegracijaDb_TestContext db)
+   
+    public class SpecifikacijaManager
     {
-        public List<InsertedFile> Files (List<FileDetail> files)
+        private readonly GlobosSftpService _sftpService;
+
+        private readonly VizimIntegracijaDb_Context _db;
+        public SpecifikacijaManager(GlobosSftpService sftpService, VizimIntegracijaDb_Context db )
         {
-            List<InsertedFile> fileNameList = new();
-         
-            foreach (FileDetail file in files)
+            _sftpService = sftpService;
+            _db = db;
+        }
+
+        public void upisiFajlove()
+        {
+            List<InsertedFile> listaFajlova = new();
+            listaFajlova = (List<InsertedFile>)_sftpService.ListaJsona();
+
+
+            foreach (var file in listaFajlova)
             {
-                var existingEntry = db.DZOI_Vizim_Json.FirstOrDefault(x => x.nazivJson == file.Name);
+                var existingEntry = _db.DZOI_Vizim_Json.FirstOrDefault(x => x.nazivJson == file.FullName);
                 if (existingEntry is null)
                 {
                     DZOI_Vizim_Json newEntry = new DZOI_Vizim_Json
                     {
-                        nazivJson = file.Name,
+                        nazivJson = file.FullName,
                         StatusId = 1,
                         SistemskiDatum = DateTime.Now
                     };
-                    db.DZOI_Vizim_Json.Add(newEntry);
-                    db.SaveChanges();
-                    InsertedFile newFile = new InsertedFile
-                    {
-                        IdJson = newEntry.Id,
-                        FullName = file.FullName
-                    };
-                    fileNameList.Add(newFile);
+                    _db.DZOI_Vizim_Json.Add(newEntry);
+                    _db.SaveChanges();
+               
                 }
                 else
                 {
@@ -37,7 +47,10 @@ namespace DZO_IntegracijaUstanovaDokumentacija_API.Managers
                 }
             }
 
-            return fileNameList;    
+          
+
+
+
         }
         public FileJson ReadJson(string jsonContent)
         {
@@ -46,14 +59,14 @@ namespace DZO_IntegracijaUstanovaDokumentacija_API.Managers
 
         public void LogError(int fileId, string error)
         {
-            DZOI_Vizim_Json jSon = db.DZOI_Vizim_Json.Where(j => j.Id == fileId).FirstOrDefault();
+            DZOI_Vizim_Json jSon = _db.DZOI_Vizim_Json.Where(j => j.Id == fileId).FirstOrDefault();
             jSon.StatusId = 3;
-            db.DZOI_Vizim_ErrorJson.Add(new DZOI_Vizim_ErrorJson
+            _db.DZOI_Vizim_ErrorJson.Add(new DZOI_Vizim_ErrorJson
             {
                 IdJson = fileId,
                 NazivGreske = error
             });
-            db.SaveChanges();
+            _db.SaveChanges();
         }
 
 
@@ -135,7 +148,7 @@ namespace DZO_IntegracijaUstanovaDokumentacija_API.Managers
             racun = FormatTypeHelper.ToDataTableFromList(racuni);
             stavka = FormatTypeHelper.ToDataTableFromList(stavke);
             fajl = FormatTypeHelper.ToDataTableFromList(fajlovi);
-            return  await db.Procedures.DZOI_InsertSpecifikacijeRacunaFajlovaAsync(specifikacija, racun, stavka, fajl);
+            return  await _db.Procedures.DZOI_InsertSpecifikacijeRacunaFajlovaAsync(specifikacija, racun, stavka, fajl);
         }
     }
 }

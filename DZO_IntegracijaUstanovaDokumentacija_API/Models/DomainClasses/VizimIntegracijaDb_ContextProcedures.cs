@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace DZO_IntegracijaUstanovaDokumentacija_API.Models.DomainClasses
 {
-    public partial class VizimIntegracijaDb_TestContext
+    public partial class VizimIntegracijaDb_Context
     {
         private IVizimIntegracijaDb_TestContextProcedures _procedures;
 
@@ -18,7 +18,7 @@ namespace DZO_IntegracijaUstanovaDokumentacija_API.Models.DomainClasses
         {
             get
             {
-                if (_procedures is null) _procedures = new VizimIntegracijaDb_TestContextProcedures(this);
+                if (_procedures is null) _procedures = new VizimIntegracijaDb_ContextProcedures(this);
                 return _procedures;
             }
             set
@@ -38,11 +38,11 @@ namespace DZO_IntegracijaUstanovaDokumentacija_API.Models.DomainClasses
         }
     }
 
-    public partial class VizimIntegracijaDb_TestContextProcedures : IVizimIntegracijaDb_TestContextProcedures
+    public partial class VizimIntegracijaDb_ContextProcedures : IVizimIntegracijaDb_TestContextProcedures
     {
-        private readonly VizimIntegracijaDb_TestContext _context;
+        private readonly VizimIntegracijaDb_Context _context;
 
-        public VizimIntegracijaDb_TestContextProcedures(VizimIntegracijaDb_TestContext context)
+        public VizimIntegracijaDb_ContextProcedures(VizimIntegracijaDb_Context context)
         {
             _context = context;
         }

@@ -1,4 +1,6 @@
+using DZO_IntegracijaUstanovaDokumentacija_API.Models.DataTransferObjects;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -18,15 +20,27 @@ builder.Services.AddCors(options =>
     });
 });
 
-builder.Services.AddDbContext<VizimIntegracijaDb_TestContext>(options =>
+IConfigurationRoot configuration = new ConfigurationBuilder()
+         .SetBasePath(AppDomain.CurrentDomain.BaseDirectory)
+         .AddJsonFile("appsettings.json")
+         .Build();
+
+
+builder.Services.AddDbContext<VizimIntegracijaDb_Context>(options =>
 {
     options.UseSqlServer(@"Data Source = TEST-SQL; Initial Catalog = VizimIntegracijaDb_Test; User ID = sqluser; Password = GlobosTest1; TrustServerCertificate=True;Encrypt=true");
 });
 
 
-
+builder.Services.Configure<GlobosSftpSetting>(builder.Configuration.GetSection("GlobosSftpSettings"));
+builder.Services.AddSingleton<GlobosSftpSetting>(); // SftpService kao singleton
 
 var app = builder.Build();
+
+
+
+
+
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
