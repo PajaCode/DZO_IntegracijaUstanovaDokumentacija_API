@@ -13,7 +13,8 @@ public partial class DZOI_Vizim_Json
     [Key]
     public int Id { get; set; }
 
-    [StringLength(50)]
+    [StringLength(100)]
+    [Unicode(false)]
     public string nazivJson { get; set; }
 
     public int? StatusId { get; set; }

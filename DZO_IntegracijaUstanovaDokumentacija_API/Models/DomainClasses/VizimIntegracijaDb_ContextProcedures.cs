@@ -12,9 +12,9 @@ namespace DZO_IntegracijaUstanovaDokumentacija_API.Models.DomainClasses
 {
     public partial class VizimIntegracijaDb_Context
     {
-        private IVizimIntegracijaDb_TestContextProcedures _procedures;
+        private IVizimIntegracijaDb_ContextProcedures _procedures;
 
-        public virtual IVizimIntegracijaDb_TestContextProcedures Procedures
+        public virtual IVizimIntegracijaDb_ContextProcedures Procedures
         {
             get
             {
@@ -27,7 +27,7 @@ namespace DZO_IntegracijaUstanovaDokumentacija_API.Models.DomainClasses
             }
         }
 
-        public IVizimIntegracijaDb_TestContextProcedures GetProcedures()
+        public IVizimIntegracijaDb_ContextProcedures GetProcedures()
         {
             return Procedures;
         }
@@ -38,7 +38,7 @@ namespace DZO_IntegracijaUstanovaDokumentacija_API.Models.DomainClasses
         }
     }
 
-    public partial class VizimIntegracijaDb_ContextProcedures : IVizimIntegracijaDb_TestContextProcedures
+    public partial class VizimIntegracijaDb_ContextProcedures : IVizimIntegracijaDb_ContextProcedures
     {
         private readonly VizimIntegracijaDb_Context _context;
 

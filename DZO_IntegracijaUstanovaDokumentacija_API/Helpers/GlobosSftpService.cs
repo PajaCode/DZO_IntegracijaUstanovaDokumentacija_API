@@ -9,7 +9,7 @@ namespace DZO_IntegracijaUstanovaDokumentacija_API.Helpers
     {
         private readonly GlobosSftpSetting _sftpSettings;
         private SftpClient _sftpClient;
-
+        public string RemotePath => _sftpSettings.RemotePath;
         public GlobosSftpService(IOptions<GlobosSftpSetting> sftpSettings)
         {
             _sftpSettings = sftpSettings.Value;
@@ -31,7 +31,7 @@ namespace DZO_IntegracijaUstanovaDokumentacija_API.Helpers
             }
         }
 
-        public IEnumerable<string> ListaJsona()
+        public List<string> ListaJsona()
         {
             Connect();
 
@@ -46,30 +46,27 @@ namespace DZO_IntegracijaUstanovaDokumentacija_API.Helpers
                 }
             }
 
-            Disconnect();
+            Connect();
 
             return files;
         }
 
-        //public void Dispose()
-        //{
-        //    Dispose(true);
-        //    GC.SuppressFinalize(this);
-        //}
+        public string UzmiSadrzajFajla(string file)
+        {
+            Connect();
+            using (var stream = _sftpClient.OpenRead(file))
+            {
+                using (var reader = new StreamReader(stream))
+                {
+                    return reader.ReadToEnd();
+                }
 
-        //protected virtual void Dispose(bool disposing)
-        //{
-        //    if (disposing)
-        //    {
-        //        // Oslobađanje managed resursa
-        //        if (_sftpClient != null)
-        //        {
-        //            _sftpClient.Dispose();
-        //            _sftpClient = null;
-        //        }
-        //    }
-            // Oslobađanje unmanaged resursa
-        //}
+            }
+
+           
+        }
+
+
     }
 
 }

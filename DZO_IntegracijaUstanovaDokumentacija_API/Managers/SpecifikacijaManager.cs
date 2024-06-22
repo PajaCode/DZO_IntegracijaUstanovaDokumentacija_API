@@ -4,17 +4,20 @@ using DZO_IntegracijaUstanovaDokumentacija_API.Models.DomainClasses;
 using HR_API.Helpers;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
+using Newtonsoft.Json;
 using System.Net.Http.Json;
+using System.Text.Json.Nodes;
 
 namespace DZO_IntegracijaUstanovaDokumentacija_API.Managers
 {
-   
+
     public class SpecifikacijaManager
     {
-        private readonly IOptions<GlobosSftpSetting> _sftpService;
+        private readonly GlobosSftpService _sftpService;
         private readonly VizimIntegracijaDb_Context _db;
-        public SpecifikacijaManager(IOptions<GlobosSftpSetting> sftpService, VizimIntegracijaDb_Context db)
+        public SpecifikacijaManager(GlobosSftpService sftpService, VizimIntegracijaDb_Context db)
         {
             _sftpService = sftpService;
             _db = db;
@@ -22,55 +25,81 @@ namespace DZO_IntegracijaUstanovaDokumentacija_API.Managers
 
         public void upisiFajlove()
         {
-            List<InsertedFile> listaFajlova = new();
-            //listaFajlova = (List<InsertedFile>)_sftpService.ListaJsona();
+            List<string> listaFajlova = new();
+            listaFajlova = _sftpService.ListaJsona();
 
 
             foreach (var file in listaFajlova)
             {
-                var existingEntry = _db.DZOI_Vizim_Json.FirstOrDefault(x => x.nazivJson == file.FullName);
+                var existingEntry = _db.DZOI_Vizim_Json.FirstOrDefault(x => x.nazivJson == file);
                 if (existingEntry is null)
                 {
                     DZOI_Vizim_Json newEntry = new DZOI_Vizim_Json
                     {
-                        nazivJson = file.FullName,
+                        nazivJson = file,
                         StatusId = 1,
                         SistemskiDatum = DateTime.Now
                     };
                     _db.DZOI_Vizim_Json.Add(newEntry);
                     _db.SaveChanges();
-               
+
                 }
                 else
                 {
                     continue;
                 }
             }
-
-          
-
-
-
-        }
-        public FileJson ReadJson(string jsonContent)
-        {
-            return JsonConvert.DeserializeObject<FileJson>(jsonContent);
         }
 
-        public void LogError(int fileId, string error)
+        public async Task parsirajIinsertujAsync()
         {
-            DZOI_Vizim_Json jSon = _db.DZOI_Vizim_Json.Where(j => j.Id == fileId).FirstOrDefault();
-            jSon.StatusId = 3;
-            _db.DZOI_Vizim_ErrorJson.Add(new DZOI_Vizim_ErrorJson
+            var rezultat = _db.DZOI_Vizim_Json.Where(x => x.StatusId == 1).ToList();
+
+
+            try
             {
-                IdJson = fileId,
-                NazivGreske = error
-            });
-            _db.SaveChanges();
+
+                foreach (var rezultatItem in rezultat)
+                {
+                    string nazivString = new string(rezultatItem.nazivJson); // Konvertovanje niza char u string
+
+                   // string putanjaDoFajla = Path.Combine(_sftpService.RemotePath, nazivString);
+                   
+                    string sadrzajFajla = _sftpService.UzmiSadrzajFajla(nazivString);
+                    _sftpService.Disconnect();
+
+                    try
+                    {
+                       var jsonObject = JsonConvert.DeserializeObject<FileJson>(sadrzajFajla);
+
+                        try
+                        {
+                            _ = await InsertPodatakaIzJsona(jsonObject, rezultatItem.Id);
+                        }
+                        catch (Exception ex)
+                        {
+
+                            LogError(rezultatItem.Id, ex.Message + "metoda parsirajIinsertuj - insert");
+                            continue;
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+
+                        LogError(rezultatItem.Id, ex.Message + "metoda parsirajIinsertuj - parsiranje JSON-a");
+                        continue;
+                    }
+
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Greška: " + ex.Message);
+                throw; // Bacaće originalnu grešku i možete videti tačan uzrok
+            }
         }
 
-
-        public async Task<List<DZOI_InsertSpecifikacijeRacunaFajlovaResult>> InsertPodatakaIzJsona(FileJson fileJson,int idJson)
+        public async Task<List<DZOI_InsertSpecifikacijeRacunaFajlovaResult>> InsertPodatakaIzJsona(FileJson fileJson, int idJson)
         {
 
             DataTable specifikacija = new();
@@ -80,8 +109,8 @@ namespace DZO_IntegracijaUstanovaDokumentacija_API.Managers
 
             string opisJson = JsonConvert.SerializeObject(fileJson);
             ZaglavljeTable zaglavljeTable = new ZaglavljeTable
-            {   
-                IdJson= idJson,
+            {
+                IdJson = idJson,
                 FakturaId = fileJson.Zaglavlje.FakturaId,
                 FakturaBroj = fileJson.Zaglavlje.FakturaBroj,
                 UstanovaIDMG = fileJson.Zaglavlje.UstanovaIDMG,
@@ -148,7 +177,88 @@ namespace DZO_IntegracijaUstanovaDokumentacija_API.Managers
             racun = FormatTypeHelper.ToDataTableFromList(racuni);
             stavka = FormatTypeHelper.ToDataTableFromList(stavke);
             fajl = FormatTypeHelper.ToDataTableFromList(fajlovi);
-            return  await _db.Procedures.DZOI_InsertSpecifikacijeRacunaFajlovaAsync(specifikacija, racun, stavka, fajl);
+            return await _db.Procedures.DZOI_InsertSpecifikacijeRacunaFajlovaAsync(specifikacija, racun, stavka, fajl);
+        }
+    
+
+
+public void LogError(int fileId, string error)
+        {
+            DZOI_Vizim_Json jSon = _db.DZOI_Vizim_Json.Where(j => j.Id == fileId).FirstOrDefault();
+            jSon.StatusId = 3;
+            _db.DZOI_Vizim_ErrorJson.Add(new DZOI_Vizim_ErrorJson
+            {
+                IdJson = fileId,
+                NazivGreske = error
+            });
+            _db.SaveChanges();
         }
     }
 }
+
+//            foreach (var file in rezultat)
+//                {
+
+//                    using (MemoryStream stream = new MemoryStream())
+//                    {
+//                        sftp.DownloadFile(sourceFilePath, stream);
+//                        stream.Position = 0;
+
+//                        using (var reader = new StreamReader(stream))
+//                        {
+//                            string jsonContent = reader.ReadToEnd();
+
+//                            try
+//                            {
+//                                jsonObject = specifikacijaManager.ReadJson(jsonContent);
+//                            }
+//                            catch (JsonException ex)
+//                            {
+//                                
+//                            }
+
+//                        }
+//                    }
+//                    try
+//                    {
+//                        DZOI_Vizim_Json jSon = db.DZOI_Vizim_Json.Where(j => j.Id == file.IdJson).FirstOrDefault();
+//                        if (jSon.StatusId == 3)
+//                        {
+//                            continue;
+//                        }
+//                        else
+//                        {
+//                            await specifikacijaManager.InsertPodatakaIzJsona(jsonObject, file.IdJson);
+//                        }
+
+//                    }
+//                    catch (Exception ex)
+//                    {
+//                        specifikacijaManager.LogError(file.IdJson, ex.Message + "- procedura DZOI_InsertSpecifikacijeRacunaFajlova");
+//                        continue;
+//                    }
+
+//                }
+
+//                sftp.Disconnect();
+
+//                return Ok("Dobar posao odrađen");
+//            }
+//            catch (Exception ex)
+//            {
+//                return StatusCode(500, $"Error: {ex.Message}");
+//            }
+//        }
+
+
+
+//    }
+//        public FileJson ReadJson(string jsonContent)
+//        {
+//            return JsonConvert.DeserializeObject<FileJson>(jsonContent);
+//        }
+
+
+
+
+//        

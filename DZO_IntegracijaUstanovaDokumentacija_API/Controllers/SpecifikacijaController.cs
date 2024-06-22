@@ -15,9 +15,9 @@ namespace DZO_IntegracijaUstanovaDokumentacija_API.Controllers
     public class SpecifikacijaController: ControllerBase
     {
 
-        private readonly IOptions<GlobosSftpSetting> _sftpService;
+        private readonly GlobosSftpService _sftpService;
         private readonly VizimIntegracijaDb_Context _db;
-        public SpecifikacijaController(IOptions<GlobosSftpSetting> sftpService, VizimIntegracijaDb_Context db)
+        public SpecifikacijaController(GlobosSftpService sftpService, VizimIntegracijaDb_Context db)
         {
             _sftpService = sftpService; 
             _db = db;
@@ -38,76 +38,26 @@ namespace DZO_IntegracijaUstanovaDokumentacija_API.Controllers
             }
 
         }
-        //    try
-        //    {
-        //        using SftpClient sftp = new(host, username, password);
-        //        //sftp.Timeout
-
-        //        sftp.Connect();
-
-                
-
-        //        List<InsertedFile> fileNames = specifikacijaManager.Files(files);
 
 
-        //        FileJson jsonObject = new();
+        [HttpGet("parsirajIinsertuj")]
+        public IActionResult parsirajIinsertuj()
+        {
+            try
+            {
+                SpecifikacijaManager manager = new(_sftpService, _db);
+                manager.parsirajIinsertujAsync();
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Error: {ex.Message}");
+            }
+
+        }
 
 
-        //        foreach (InsertedFile file in fileNames)
-        //        {
-        //            string sourceFilePath = file.FullName;
-
-        //            using (MemoryStream stream = new MemoryStream())
-        //            {
-        //                sftp.DownloadFile(sourceFilePath, stream);
-        //                stream.Position = 0;
-
-        //                using (var reader = new StreamReader(stream))
-        //                {
-        //                    string jsonContent = reader.ReadToEnd();
-
-        //                    try
-        //                    {
-        //                        jsonObject = specifikacijaManager.ReadJson(jsonContent);
-        //                    }
-        //                    catch(JsonException ex)
-        //                    {
-        //                        specifikacijaManager.LogError(file.IdJson, ex.Message + "metoda ReadJson - parsiranje JSON-a");
-        //                        continue;
-        //                    }
-                           
-        //                }
-        //            }
-        //            try
-        //            {
-        //                DZOI_Vizim_Json jSon = db.DZOI_Vizim_Json.Where(j => j.Id == file.IdJson).FirstOrDefault();
-        //                if(jSon.StatusId == 3)
-        //                {
-        //                    continue;
-        //                }
-        //                else
-        //                {
-        //                    await specifikacijaManager.InsertPodatakaIzJsona(jsonObject,file.IdJson);
-        //                }
-                        
-        //            }
-        //            catch (Exception ex)
-        //            {
-        //                specifikacijaManager.LogError(file.IdJson, ex.Message + "- procedura DZOI_InsertSpecifikacijeRacunaFajlova");
-        //                continue;
-        //            }
-
-        //        }
-
-        //        sftp.Disconnect();              
-
-        //        return Ok("Dobar posao odrađen");
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        return StatusCode(500, $"Error: {ex.Message}");
-        //    }
-        //}
+        
 
         //[HttpGet("folder")]
         //public IActionResult CreateFolderAndMoveFiles()
@@ -127,7 +77,7 @@ namespace DZO_IntegracijaUstanovaDokumentacija_API.Controllers
         //                     });
 
         //        using SftpClient sftp = new(host, username, password);
-                
+
         //        sftp.Connect();
         //        foreach(Folderi folder in upit)
         //        {
@@ -137,7 +87,7 @@ namespace DZO_IntegracijaUstanovaDokumentacija_API.Controllers
         //                sftp.CreateDirectory(newFolderPath);
         //            }
         //        }
-                
+
         //        //var files = sftp.ListDirectory(remotePath);
 
         //        // Copy each file to the new folder
@@ -164,7 +114,7 @@ namespace DZO_IntegracijaUstanovaDokumentacija_API.Controllers
         //    {
         //        return StatusCode(500, new { message = "An error occurred while creating the folder.", error = ex.Message });
         //    }
-            
+
         //}
 
 
