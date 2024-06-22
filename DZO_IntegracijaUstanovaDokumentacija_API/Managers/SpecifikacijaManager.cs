@@ -4,6 +4,7 @@ using DZO_IntegracijaUstanovaDokumentacija_API.Models.DomainClasses;
 using HR_API.Helpers;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
 using System.Net.Http.Json;
 
 namespace DZO_IntegracijaUstanovaDokumentacija_API.Managers
@@ -11,10 +12,9 @@ namespace DZO_IntegracijaUstanovaDokumentacija_API.Managers
    
     public class SpecifikacijaManager
     {
-        private readonly GlobosSftpService _sftpService;
-
+        private readonly IOptions<GlobosSftpSetting> _sftpService;
         private readonly VizimIntegracijaDb_Context _db;
-        public SpecifikacijaManager(GlobosSftpService sftpService, VizimIntegracijaDb_Context db )
+        public SpecifikacijaManager(IOptions<GlobosSftpSetting> sftpService, VizimIntegracijaDb_Context db)
         {
             _sftpService = sftpService;
             _db = db;
@@ -23,7 +23,7 @@ namespace DZO_IntegracijaUstanovaDokumentacija_API.Managers
         public void upisiFajlove()
         {
             List<InsertedFile> listaFajlova = new();
-            listaFajlova = (List<InsertedFile>)_sftpService.ListaJsona();
+            //listaFajlova = (List<InsertedFile>)_sftpService.ListaJsona();
 
 
             foreach (var file in listaFajlova)

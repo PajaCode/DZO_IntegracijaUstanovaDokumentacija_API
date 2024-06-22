@@ -1,10 +1,11 @@
-﻿using Microsoft.Extensions.Options;
+﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
 using Renci.SshNet;
 using System.IO;
 
 namespace DZO_IntegracijaUstanovaDokumentacija_API.Helpers
 {
-    public class GlobosSftpService : IDisposable
+    public class GlobosSftpService
     {
         private readonly GlobosSftpSetting _sftpSettings;
         private SftpClient _sftpClient;
@@ -50,25 +51,25 @@ namespace DZO_IntegracijaUstanovaDokumentacija_API.Helpers
             return files;
         }
 
-        public void Dispose()
-        {
-            Dispose(true);
-            GC.SuppressFinalize(this);
-        }
+        //public void Dispose()
+        //{
+        //    Dispose(true);
+        //    GC.SuppressFinalize(this);
+        //}
 
-        protected virtual void Dispose(bool disposing)
-        {
-            if (disposing)
-            {
-                // Oslobađanje managed resursa
-                if (_sftpClient != null)
-                {
-                    _sftpClient.Dispose();
-                    _sftpClient = null;
-                }
-            }
+        //protected virtual void Dispose(bool disposing)
+        //{
+        //    if (disposing)
+        //    {
+        //        // Oslobađanje managed resursa
+        //        if (_sftpClient != null)
+        //        {
+        //            _sftpClient.Dispose();
+        //            _sftpClient = null;
+        //        }
+        //    }
             // Oslobađanje unmanaged resursa
-        }
+        //}
     }
 
 }

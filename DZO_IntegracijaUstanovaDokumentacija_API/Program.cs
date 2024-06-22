@@ -1,56 +1,43 @@
 using DZO_IntegracijaUstanovaDokumentacija_API.Helpers;
 using DZO_IntegracijaUstanovaDokumentacija_API.Models.DataTransferObjects;
-using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using DZO_IntegracijaUstanovaDokumentacija_API.Helpers;
 
-public class Program
+var builder = WebApplication.CreateBuilder(args);
+
+// Dodavanje konfiguracije iz appsettings.json
+builder.Configuration.AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
+builder.Configuration.AddJsonFile($"appsettings.{builder.Environment.EnvironmentName}.json", optional: true, reloadOnChange: true);
+builder.Configuration.AddEnvironmentVariables();
+
+// Konfiguracija GlobosSftpSetting
+builder.Services.Configure<GlobosSftpSetting>(builder.Configuration.GetSection("GlobosSftpSettings"));
+
+// Dodavanje GlobosSftpService kao singleton
+builder.Services.AddSingleton<GlobosSftpService>();
+
+// Dodavanje ostalih servisa
+builder.Services.AddControllers();
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
+builder.Services.AddHttpContextAccessor();
+
+var app = builder.Build();
+
+if (app.Environment.IsDevelopment())
 {
-    public static void Main(string[] args)
-    {
-        var builder = WebApplication.CreateBuilder(args);
-        var configuration = builder.Configuration;
-
-        // Konfiguracija GlobosSftpSetting
-        builder.Services.Configure<GlobosSftpSetting>(configuration.GetSection("GlobosSftpSettings"));
-
-        // Singleton za GlobosSftpService
-        builder.Services.AddSingleton<GlobosSftpService>();
-
-        // Dodavanje ostalih servisa po potrebi
-        builder.Services.AddControllers();
-        builder.Services.AddEndpointsApiExplorer();
-        builder.Services.AddSwaggerGen();
-        builder.Services.AddHttpContextAccessor();
-
-        var app = builder.Build();
-
-        // Konfiguracija Swagger-a
-        app.UseSwagger();
-        app.UseSwaggerUI(c =>
-        {
-            c.SwaggerEndpoint("/swagger/v1/swagger.json", "My API V1");
-        });
-
-       
-
-        if (app.Environment.IsDevelopment())
-        {
-            app.UseSwagger();
-            app.UseSwaggerUI();
-        }
-
-        app.UseAuthorization();
-
-        app.UseCors(x => x
-         .AllowAnyOrigin()
-         .AllowAnyMethod()
-         .AllowAnyHeader());
-
-        app.MapControllers();
-        app.Run();
-
-
-      
-
-    }
+    app.UseDeveloperExceptionPage();
+    app.UseSwagger();
+    app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "Your API V1"));
 }
+
+app.UseRouting();
+
+app.UseAuthorization();
+
+app.MapControllers();
+
+app.Run();
