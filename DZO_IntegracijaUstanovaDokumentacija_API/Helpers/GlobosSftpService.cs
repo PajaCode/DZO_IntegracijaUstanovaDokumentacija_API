@@ -46,7 +46,7 @@ namespace DZO_IntegracijaUstanovaDokumentacija_API.Helpers
                 }
             }
 
-            Connect();
+            
 
             return files;
         }
@@ -71,21 +71,21 @@ namespace DZO_IntegracijaUstanovaDokumentacija_API.Helpers
            
               Connect();
 
-                    if (!_sftpClient.Exists(nazivFoldera))
-                    {
-                        _sftpClient.CreateDirectory(nazivFoldera);
+            string putanjaDoFoldera = Path.Combine(_sftpSettings.RemotePath, nazivFoldera);
 
-                        return "Upeh";
-                    }
-                    else
-                    {
-                      return "Neuspeh";
+            if (!_sftpClient.Exists(putanjaDoFoldera))
+            {
+                _sftpClient.CreateDirectory(putanjaDoFoldera);
+                return "Uspeh";
+            }
+            else
+            {
+                return "Neuspeh";
+            }
 
-                     }
 
-                 
-                
-         
+
+
         }
 
 
