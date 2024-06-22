@@ -63,14 +63,14 @@ namespace DZO_IntegracijaUstanovaDokumentacija_API.Managers
                 {
                     string nazivString = new string(rezultatItem.nazivJson); // Konvertovanje niza char u string
 
-                   // string putanjaDoFajla = Path.Combine(_sftpService.RemotePath, nazivString);
-                   
+                    // string putanjaDoFajla = Path.Combine(_sftpService.RemotePath, nazivString);
+
                     string sadrzajFajla = _sftpService.UzmiSadrzajFajla(nazivString);
                     _sftpService.Disconnect();
-
+                    Logovi logovi = new(_db);
                     try
                     {
-                       var jsonObject = JsonConvert.DeserializeObject<FileJson>(sadrzajFajla);
+                        var jsonObject = JsonConvert.DeserializeObject<FileJson>(sadrzajFajla);
 
                         try
                         {
@@ -79,14 +79,14 @@ namespace DZO_IntegracijaUstanovaDokumentacija_API.Managers
                         catch (Exception ex)
                         {
 
-                            LogError(rezultatItem.Id, ex.Message + "metoda parsirajIinsertuj - insert");
+                            logovi.LogError(rezultatItem.Id, ex.Message + "metoda parsirajIinsertuj - insert");
                             continue;
                         }
                     }
                     catch (Exception ex)
                     {
 
-                        LogError(rezultatItem.Id, ex.Message + "metoda parsirajIinsertuj - parsiranje JSON-a");
+                        logovi.LogError(rezultatItem.Id, ex.Message + "metoda parsirajIinsertuj - parsiranje JSON-a");
                         continue;
                     }
 
@@ -179,20 +179,10 @@ namespace DZO_IntegracijaUstanovaDokumentacija_API.Managers
             fajl = FormatTypeHelper.ToDataTableFromList(fajlovi);
             return await _db.Procedures.DZOI_InsertSpecifikacijeRacunaFajlovaAsync(specifikacija, racun, stavka, fajl);
         }
-    
 
 
-public void LogError(int fileId, string error)
-        {
-            DZOI_Vizim_Json jSon = _db.DZOI_Vizim_Json.Where(j => j.Id == fileId).FirstOrDefault();
-            jSon.StatusId = 3;
-            _db.DZOI_Vizim_ErrorJson.Add(new DZOI_Vizim_ErrorJson
-            {
-                IdJson = fileId,
-                NazivGreske = error
-            });
-            _db.SaveChanges();
-        }
+
+
     }
 }
 

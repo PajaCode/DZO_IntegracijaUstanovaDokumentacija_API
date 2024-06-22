@@ -66,6 +66,28 @@ namespace DZO_IntegracijaUstanovaDokumentacija_API.Helpers
            
         }
 
+        public string  KreirajFolderNaSFTP(string nazivFoldera, int idJson)
+        {
+           
+              Connect();
+
+                    if (!_sftpClient.Exists(nazivFoldera))
+                    {
+                        _sftpClient.CreateDirectory(nazivFoldera);
+
+                        return "Upeh";
+                    }
+                    else
+                    {
+                      return "Neuspeh";
+
+                     }
+
+                 
+                
+         
+        }
+
 
     }
 
