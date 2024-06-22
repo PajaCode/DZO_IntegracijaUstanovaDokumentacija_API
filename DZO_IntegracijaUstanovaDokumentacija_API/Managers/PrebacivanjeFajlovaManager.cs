@@ -1,4 +1,5 @@
 ﻿using DZO_IntegracijaUstanovaDokumentacija_API.Helpers;
+using DZO_IntegracijaUstanovaDokumentacija_API.Models.DataTransferObjects;
 using Microsoft.EntityFrameworkCore;
 
 namespace DZO_IntegracijaUstanovaDokumentacija_API.Managers
@@ -42,7 +43,31 @@ namespace DZO_IntegracijaUstanovaDokumentacija_API.Managers
 
                     logovi.LogError(IdJson, "desila se greska prilikom kreiranja foldera:"+ex); ;
                 }
-                
+            }
+        }
+        public async Task prebaciFajloveAsync()
+        {
+             var fajlovi = await _db.Procedures.DZOI_VratiFajloveZaPrebacivanjeAsync();
+
+            foreach (var item in fajlovi)
+            {
+                string brUputa = new string(item.UputBroj);
+                int IdSpec = Convert.ToInt32(item.IdSpec);
+                string NazivFajla = new string(item.NazivFajla);
+                Logovi logovi = new(_db);
+                try
+                {
+                     _sftpService.PrebaciFajlove(brUputa, IdSpec ,NazivFajla);
+                    //if (uspeh == "Neuspeh") { logovi.LogError(IdJson, "pokusano kreiranje istog foldera"); ; }
+                }
+                catch (Exception ex)
+                {
+
+
+
+                    //logovi.LogError(IdJson, "desila se greska prilikom kreiranja foldera:" + ex); ;
+                }
+
             }
 
         }

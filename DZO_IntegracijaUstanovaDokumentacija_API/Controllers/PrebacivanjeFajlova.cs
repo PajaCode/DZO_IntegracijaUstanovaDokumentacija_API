@@ -34,6 +34,24 @@ namespace DZO_IntegracijaUstanovaDokumentacija_API.Controllers
 
         }
 
-      
+
+        [HttpGet("prebaciFajlove")]
+        public IActionResult prebaciFajlove()
+        {
+            try
+            {
+                PrebacivanjeFajlovaManager manager = new(_sftpService, _db);
+                manager.prebaciFajloveAsync();
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Error: {ex.Message}");
+            }
+
+        }
+
+
+
     }
 }

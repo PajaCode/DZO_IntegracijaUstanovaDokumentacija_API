@@ -1,5 +1,5 @@
 ﻿{
-   "CodeGenerationMode": 4,
+   "CodeGenerationMode": 3,
    "ContextClassName": "VizimIntegracijaDb_Context",
    "ContextNamespace": null,
    "DefaultDacpacSchema": null,
@@ -49,6 +49,10 @@
       },
       {
          "Name": "[dbo].[DZOI_InsertSpecifikacijeRacunaFajlova]",
+         "ObjectType": 1
+      },
+      {
+         "Name": "[dbo].[DZOI_VratiFajloveZaPrebacivanje]",
          "ObjectType": 1
       }
    ],

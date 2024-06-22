@@ -13,5 +13,6 @@ namespace DZO_IntegracijaUstanovaDokumentacija_API.Models.DomainClasses
     public partial interface IVizimIntegracijaDb_ContextProcedures
     {
         Task<List<DZOI_InsertSpecifikacijeRacunaFajlovaResult>> DZOI_InsertSpecifikacijeRacunaFajlovaAsync(DataTable Specifikacije, DataTable Racuni, DataTable StavkeRacuna, DataTable Fajlovi, OutputParameter<int> returnValue = null, CancellationToken cancellationToken = default);
+        Task<List<DZOI_VratiFajloveZaPrebacivanjeResult>> DZOI_VratiFajloveZaPrebacivanjeAsync(OutputParameter<int> returnValue = null, CancellationToken cancellationToken = default);
     }
 }

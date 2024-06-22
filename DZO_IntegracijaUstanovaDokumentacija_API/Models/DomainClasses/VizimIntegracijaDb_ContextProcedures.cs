@@ -35,6 +35,7 @@ namespace DZO_IntegracijaUstanovaDokumentacija_API.Models.DomainClasses
         protected void OnModelCreatingGeneratedProcedures(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<DZOI_InsertSpecifikacijeRacunaFajlovaResult>().HasNoKey().ToView(null);
+            modelBuilder.Entity<DZOI_VratiFajloveZaPrebacivanjeResult>().HasNoKey().ToView(null);
         }
     }
 
@@ -89,6 +90,26 @@ namespace DZO_IntegracijaUstanovaDokumentacija_API.Models.DomainClasses
                 parameterreturnValue,
             };
             var _ = await _context.SqlQueryAsync<DZOI_InsertSpecifikacijeRacunaFajlovaResult>("EXEC @returnValue = [dbo].[DZOI_InsertSpecifikacijeRacunaFajlova] @Specifikacije, @Racuni, @StavkeRacuna, @Fajlovi", sqlParameters, cancellationToken);
+
+            returnValue?.SetValue(parameterreturnValue.Value);
+
+            return _;
+        }
+
+        public virtual async Task<List<DZOI_VratiFajloveZaPrebacivanjeResult>> DZOI_VratiFajloveZaPrebacivanjeAsync(OutputParameter<int> returnValue = null, CancellationToken cancellationToken = default)
+        {
+            var parameterreturnValue = new SqlParameter
+            {
+                ParameterName = "returnValue",
+                Direction = System.Data.ParameterDirection.Output,
+                SqlDbType = System.Data.SqlDbType.Int,
+            };
+
+            var sqlParameters = new []
+            {
+                parameterreturnValue,
+            };
+            var _ = await _context.SqlQueryAsync<DZOI_VratiFajloveZaPrebacivanjeResult>("EXEC @returnValue = [dbo].[DZOI_VratiFajloveZaPrebacivanje]", sqlParameters, cancellationToken);
 
             returnValue?.SetValue(parameterreturnValue.Value);
 

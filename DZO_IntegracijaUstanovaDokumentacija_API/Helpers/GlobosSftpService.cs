@@ -84,9 +84,39 @@ namespace DZO_IntegracijaUstanovaDokumentacija_API.Helpers
             }
 
 
-
-
         }
+        public void PrebaciFajlove(string brUputa, int IdSpec , string NazivFajla)
+        {
+           
+
+           
+                try
+                {
+                    string putanjaDoFajla = Path.Combine(_sftpSettings.RemotePath, NazivFajla);
+                    string putanjaDoFoldera = Path.Combine(_sftpSettings.RemotePath, brUputa);
+
+                    // Proveravamo da li fajl postoji pre nego što ga premestimo
+                    if (File.Exists(putanjaDoFajla))
+                    {
+                        // Formiramo putanju za novu lokaciju fajla
+                        string novaPutanjaDoFajla = Path.Combine(putanjaDoFoldera, Path.GetFileName(putanjaDoFajla));
+
+                        // Premestamo fajl
+                        File.Move(putanjaDoFajla, novaPutanjaDoFajla);
+                        //Console.WriteLine($"Fajl '{imeFajla}' uspešno premesten u folder '{putanjaDoFoldera}'.");
+                    }
+                    else
+                    {
+                        //Console.WriteLine($"Fajl '{imeFajla}' ne postoji na zadatoj putanji.");
+                    }
+                }
+                catch (Exception ex)
+                {
+                   // Console.WriteLine($"Greška prilikom premestanja fajla '{imeFajla}': {ex.Message}");
+                }
+            
+        }
+
 
 
     }
