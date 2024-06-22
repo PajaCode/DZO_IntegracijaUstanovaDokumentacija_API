@@ -14,7 +14,6 @@ namespace DZO_IntegracijaUstanovaDokumentacija_API.Controllers
     {
 
         private readonly GlobosSftpService _sftpService;
-
         private readonly VizimIntegracijaDb_Context _db;
         public SpecifikacijaController(GlobosSftpService sftpService, VizimIntegracijaDb_Context db)
         {
@@ -22,7 +21,7 @@ namespace DZO_IntegracijaUstanovaDokumentacija_API.Controllers
             _db = db;
         }
 
-        [HttpGet("uzmiNazivFajla")]
+        [HttpGet("upisiFajlove")]
         public IActionResult upisiFajlove()
         {
             try

@@ -1,63 +1,56 @@
+using DZO_IntegracijaUstanovaDokumentacija_API.Helpers;
 using DZO_IntegracijaUstanovaDokumentacija_API.Models.DataTransferObjects;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 
-var builder = WebApplication.CreateBuilder(args);
-
-
-builder.Services.AddControllers();
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
-builder.Services.AddHttpContextAccessor();
-
-builder.Services.AddCors(options =>
+public class Program
 {
-    options.AddDefaultPolicy(builder =>
+    public static void Main(string[] args)
     {
-        builder.AllowAnyOrigin()
-               .AllowAnyMethod()
-               .AllowAnyHeader();
-    });
-});
+        var builder = WebApplication.CreateBuilder(args);
+        var configuration = builder.Configuration;
 
-IConfigurationRoot configuration = new ConfigurationBuilder()
-         .SetBasePath(AppDomain.CurrentDomain.BaseDirectory)
-         .AddJsonFile("appsettings.json")
-         .Build();
+        // Konfiguracija GlobosSftpSetting
+        builder.Services.Configure<GlobosSftpSetting>(configuration.GetSection("GlobosSftpSettings"));
 
+        // Singleton za GlobosSftpService
+        builder.Services.AddSingleton<GlobosSftpService>();
 
-builder.Services.AddDbContext<VizimIntegracijaDb_Context>(options =>
-{
-    options.UseSqlServer(@"Data Source = TEST-SQL; Initial Catalog = VizimIntegracijaDb_Test; User ID = sqluser; Password = GlobosTest1; TrustServerCertificate=True;Encrypt=true");
-});
+        // Dodavanje ostalih servisa po potrebi
+        builder.Services.AddControllers();
+        builder.Services.AddEndpointsApiExplorer();
+        builder.Services.AddSwaggerGen();
+        builder.Services.AddHttpContextAccessor();
 
+        var app = builder.Build();
 
-builder.Services.Configure<GlobosSftpSetting>(builder.Configuration.GetSection("GlobosSftpSettings"));
-builder.Services.AddSingleton<GlobosSftpSetting>(); // SftpService kao singleton
+        // Konfiguracija Swagger-a
+        app.UseSwagger();
+        app.UseSwaggerUI(c =>
+        {
+            c.SwaggerEndpoint("/swagger/v1/swagger.json", "My API V1");
+        });
 
-var app = builder.Build();
+       
 
+        if (app.Environment.IsDevelopment())
+        {
+            app.UseSwagger();
+            app.UseSwaggerUI();
+        }
 
+        app.UseAuthorization();
 
-
-
-
-// Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
-
-app.UseRouting();
-
-app.UseAuthorization();
-
-app.UseCors(x => x
+        app.UseCors(x => x
          .AllowAnyOrigin()
          .AllowAnyMethod()
          .AllowAnyHeader());
 
-app.MapControllers();
+        app.MapControllers();
+        app.Run();
 
-app.Run();
+
+      
+
+    }
+}
