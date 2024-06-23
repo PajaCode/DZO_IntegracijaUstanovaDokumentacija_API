@@ -3,6 +3,7 @@ using Microsoft.Extensions.Options;
 using Renci.SshNet;
 using System.IO;
 using System.Net.Mail;
+using System.Reflection.Metadata.Ecma335;
 
 namespace DZO_IntegracijaUstanovaDokumentacija_API.Helpers
 {
@@ -50,9 +51,10 @@ namespace DZO_IntegracijaUstanovaDokumentacija_API.Helpers
 
             }
             catch (Exception ex)
-            {
-                //kopiraj u gresku
+            {     
+                
                 return ["neuspeh", ex.ToString()];
+                
             }
                      
                     

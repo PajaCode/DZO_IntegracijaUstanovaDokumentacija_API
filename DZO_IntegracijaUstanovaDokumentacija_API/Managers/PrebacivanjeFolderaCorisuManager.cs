@@ -39,7 +39,8 @@ namespace DZO_IntegracijaUstanovaDokumentacija_API.Managers
                         {
 
                             var uspeh = _sftpServiceCor.PrebaciFoldereSFTP(naziv, folder);
-                            if (uspeh[0] == "Neuspeh") { logovi.LogError(IdJson, "nije se kopirao folder:" + uspeh[1]); logovi.AzurirajStatusFoldera(IdJson, naziv, 3); }
+                            if (uspeh[0] == "Neuspeh") { logovi.LogError(IdJson, "nije se kopirao folder:" + uspeh[1]); logovi.AzurirajStatusFoldera(IdJson, naziv, 3);//kopiraj u gresku
+                                continue; }
                             else { logovi.AzurirajStatusFoldera(IdJson, naziv, 2); //brisi folder
                             }
                         } 
@@ -49,9 +50,11 @@ namespace DZO_IntegracijaUstanovaDokumentacija_API.Managers
                 catch (Exception ex)
                 {
 
-                    throw;
+                    logovi.LogError(IdJson, "nije se kopirao folder:" + ex.ToString());
                 }
             }
+
+         
 
                
 
