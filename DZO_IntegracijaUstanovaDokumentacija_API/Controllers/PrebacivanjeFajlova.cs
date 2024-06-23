@@ -29,7 +29,7 @@ namespace DZO_IntegracijaUstanovaDokumentacija_API.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, $"Error: {ex.Message}");
+                return StatusCode(500, $"kreiranje foldera: {ex.Message}");
             }
 
         }
@@ -46,7 +46,7 @@ namespace DZO_IntegracijaUstanovaDokumentacija_API.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, $"Error: {ex.Message}");
+                return StatusCode(500, $"prebacivanje fajlova: {ex.Message}");
             }
 
         }

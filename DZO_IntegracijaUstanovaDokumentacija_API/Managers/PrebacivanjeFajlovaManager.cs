@@ -35,14 +35,14 @@ namespace DZO_IntegracijaUstanovaDokumentacija_API.Managers
                 try
                 {  
                     string uspeh = _sftpService.KreirajFolderNaSFTP(brUputa);
-                    if (uspeh == "Neuspeh") { logovi.LogError(IdJson, "pokusano kreiranje istog foldera"); ; }
+                    if (uspeh == "Neuspeh") { logovi.LogError(IdJson, "pokusano kreiranje istog foldera");  }
                 }
                 catch (Exception ex)
                 {
 
                     
 
-                    logovi.LogError(IdJson, "desila se greska prilikom kreiranja foldera:"+ex); ;
+                    logovi.LogError(IdJson, "desila se greska prilikom kreiranja foldera:"+ex);
                 }
             }
         }
