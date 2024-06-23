@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using Renci.SshNet;
+using Renci.SshNet.Sftp;
+using System.Collections.Generic;
 using System.IO;
 
 namespace DZO_IntegracijaUstanovaDokumentacija_API.Helpers
@@ -8,7 +10,7 @@ namespace DZO_IntegracijaUstanovaDokumentacija_API.Helpers
     public class GlobosSftpService
     {
         private readonly GlobosSftpSetting _sftpSettings;
-        private readonly SftpClient _sftpClient;
+        public SftpClient _sftpClient;
         public string RemotePath => _sftpSettings.RemotePath;
         public GlobosSftpService(IOptions<GlobosSftpSetting> sftpSettings)
         {
@@ -46,7 +48,7 @@ namespace DZO_IntegracijaUstanovaDokumentacija_API.Helpers
                 }
             }
 
-            
+
 
             return files;
         }
@@ -63,21 +65,21 @@ namespace DZO_IntegracijaUstanovaDokumentacija_API.Helpers
 
             }
 
-           
+
         }
 
-        public string  KreirajFolderNaSFTP(string nazivFoldera)
+        public string KreirajFolderNaSFTP(string nazivFoldera)
         {
-           
-              Connect();
+
+            Connect();
 
             string putanjaDoFoldera = Path.Combine(_sftpSettings.RemotePath, nazivFoldera);
 
             if (!_sftpClient.Exists(putanjaDoFoldera))
             {
                 _sftpClient.CreateDirectory(putanjaDoFoldera);
-                
-                
+
+
                 return "Uspeh";
             }
             else
@@ -87,33 +89,50 @@ namespace DZO_IntegracijaUstanovaDokumentacija_API.Helpers
 
 
         }
-        public string PrebaciFajlove(string brUputa , string NazivFajla)
+        public string PrebaciFajlove(string brUputa, string NazivFajla)
         {
-          
-             string putanjaDoFajla = Path.Combine(_sftpSettings.RemotePath, NazivFajla);
-             string putanjaDoFoldera = Path.Combine(_sftpSettings.RemotePath, brUputa);
-             
-             Connect();
 
-                var files = _sftpClient.ListDirectory(_sftpSettings.RemotePath);
+            string putanjaDoFajla = Path.Combine(_sftpSettings.RemotePath, NazivFajla);
+            string putanjaDoFoldera = Path.Combine(_sftpSettings.RemotePath, brUputa);
 
-                bool pdfExists = files.Any(f => f.Name == NazivFajla && !f.IsDirectory);
+            Connect();
 
-                if (pdfExists)
-                {
-                    _sftpClient.RenameFile(_sftpSettings.RemotePath, putanjaDoFoldera + pdfExists);
-                    return "Uspeh";
-                }
-                else
-                {
-                    return "Nespeh";
-                }
-            
-              
-            
+            var files = _sftpClient.ListDirectory(_sftpSettings.RemotePath);
+
+            bool pdfExists = files.Any(f => f.Name == NazivFajla && !f.IsDirectory);
+
+            if (pdfExists)
+            {
+                _sftpClient.RenameFile(_sftpSettings.RemotePath, putanjaDoFoldera + pdfExists);
+                return "Uspeh";
+            }
+            else
+            {
+                return "Nespeh";
+            }
+
+
+
         }
 
+        public List<string> ListaFoldera()
+        {
+            
+            Connect();
 
+            var folderi = _sftpClient.ListDirectory(_sftpSettings.RemotePath)
+                                     .Where(f => f.IsDirectory)
+                                     .Select(f => f.Name)
+                                     .ToList();
+
+            Disconnect();
+
+            return folderi;
+
+
+        }
+
+     
 
     }
 

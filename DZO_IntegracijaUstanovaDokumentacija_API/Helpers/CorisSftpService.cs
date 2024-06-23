@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Options;
 using Renci.SshNet;
 using System.IO;
+using System.Net.Mail;
 
 namespace DZO_IntegracijaUstanovaDokumentacija_API.Helpers
 {
@@ -33,14 +34,45 @@ namespace DZO_IntegracijaUstanovaDokumentacija_API.Helpers
             }
         }
 
-        public void PrebaciFoldere(string naziv) {
+        public string PrebaciFoldereSFTP(string naziv) {
 
             _sftpService.Connect();
 
             Connect();
-          
 
-        
+            var folders = _sftpService.ListaFoldera();
+
+            foreach (var folder in folders)
+            {
+                try
+                {
+                    if (folder.Equals(naziv, StringComparison.OrdinalIgnoreCase))
+                    {
+
+                        using (var sourceStream = _sftpService._sftpClient.OpenRead(folder))
+                        using (var destinationStream = _sftpClientCor.Create($"{_sftpSettingsCor.RemotePath}/{folder}"))
+                        {
+                            sourceStream.CopyTo(destinationStream);
+                        }
+
+                        continue;
+                    }
+                    
+                   
+
+                }
+                catch (Exception ex)
+                {
+
+                    return ex.ToString();
+                }
+               
+            }
+
+            return "kraj";
+
+
+
         }
        
 

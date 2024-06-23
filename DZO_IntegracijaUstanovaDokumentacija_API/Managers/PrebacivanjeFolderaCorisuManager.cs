@@ -24,7 +24,7 @@ namespace DZO_IntegracijaUstanovaDokumentacija_API.Managers
 
                 try
                 {
-                    var uspeh = _sftpServiceCor.PrebaciFoldere(naziv);
+                    var uspeh = _sftpServiceCor.PrebaciFoldereSFTP(naziv);
                     //        if (uspeh == "Neuspeh") { logovi.LogError(IdJson, "fajl ne postoji"); logovi.AzurirajStatusFajlova(idSpec, NazivFajla, 3); }
                     //        else { logovi.AzurirajStatusFajlova(idSpec, NazivFajla, 2); }
 

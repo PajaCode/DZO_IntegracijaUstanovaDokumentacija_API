@@ -22,7 +22,7 @@ namespace DZO_IntegracijaUstanovaDokumentacija_API.Controllers
         {
             try
             {
-                PrebacivanjeFolderaCorisuManager manager = new();
+                PrebacivanjeFolderaCorisuManager manager = new(_sftpService,_sftpServiceCor,_db);
                 manager.PrebaciFoldere();
                 return Ok();
             }
