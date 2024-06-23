@@ -76,6 +76,8 @@ namespace DZO_IntegracijaUstanovaDokumentacija_API.Helpers
             if (!_sftpClient.Exists(putanjaDoFoldera))
             {
                 _sftpClient.CreateDirectory(putanjaDoFoldera);
+                
+                
                 return "Uspeh";
             }
             else

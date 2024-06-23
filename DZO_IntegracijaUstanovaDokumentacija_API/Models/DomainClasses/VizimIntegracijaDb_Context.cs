@@ -21,6 +21,8 @@ public partial class VizimIntegracijaDb_Context : DbContext
 
     public virtual DbSet<DZOI_Vizim_Fajlovi> DZOI_Vizim_Fajlovi { get; set; }
 
+    public virtual DbSet<DZOI_Vizim_Folder> DZOI_Vizim_Folder { get; set; }
+
     public virtual DbSet<DZOI_Vizim_Json> DZOI_Vizim_Json { get; set; }
 
     public virtual DbSet<DZOI_Vizim_Racun> DZOI_Vizim_Racun { get; set; }
@@ -55,6 +57,11 @@ public partial class VizimIntegracijaDb_Context : DbContext
             entity.HasOne(d => d.IdSpecifikacijeNavigation).WithMany(p => p.DZOI_Vizim_Fajlovi).HasConstraintName("FK__DZOI_Vizi__IdSpe__2F10007B");
 
             entity.HasOne(d => d.Status).WithMany(p => p.DZOI_Vizim_Fajlovi).HasConstraintName("FK__DZOI_Vizi__Statu__300424B4");
+        });
+
+        modelBuilder.Entity<DZOI_Vizim_Folder>(entity =>
+        {
+            entity.HasOne(d => d.Status).WithMany(p => p.DZOI_Vizim_Folder).HasConstraintName("FK_DZOI_Vizim_Folder_DZOI_Status");
         });
 
         modelBuilder.Entity<DZOI_Vizim_Json>(entity =>
