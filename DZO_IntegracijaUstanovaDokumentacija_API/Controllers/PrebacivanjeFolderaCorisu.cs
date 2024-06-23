@@ -7,5 +7,20 @@ namespace DZO_IntegracijaUstanovaDokumentacija_API.Controllers
     [ApiController]
     public class PrebacivanjeFolderaCorisu : ControllerBase
     {
+        [HttpGet("prebaciFoldere")]
+        public IActionResult PrebaciFoldere()
+        {
+            try
+            {
+                PrebacivanjeFolderaCorisuManager manager = new();
+                manager.PrebaciFoldere();
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"prebacivanje foldera: {ex.Message}");
+            }
+
+        }
     }
 }

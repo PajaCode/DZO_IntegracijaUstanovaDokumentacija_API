@@ -21,6 +21,8 @@ public partial class DZOI_Vizim_Folder
     [Column(TypeName = "datetime")]
     public DateTime? DatumPrebacivanja { get; set; }
 
+    public int? IdJson { get; set; }
+
     [ForeignKey("StatusId")]
     [InverseProperty("DZOI_Vizim_Folder")]
     public virtual DZOI_Status Status { get; set; }
