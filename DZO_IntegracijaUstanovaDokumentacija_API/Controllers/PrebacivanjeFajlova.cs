@@ -19,7 +19,7 @@ namespace DZO_IntegracijaUstanovaDokumentacija_API.Controllers
 
 
         [HttpGet("kreirajFoldere")]
-        public IActionResult kreirajFoldere()
+        public IActionResult KreirajFoldere()
         {
             try
             {
@@ -36,7 +36,7 @@ namespace DZO_IntegracijaUstanovaDokumentacija_API.Controllers
 
 
         [HttpGet("prebaciFajlove")]
-        public IActionResult prebaciFajlove()
+        public IActionResult PrebaciFajlove()
         {
             try
             {

@@ -34,7 +34,7 @@ namespace DZO_IntegracijaUstanovaDokumentacija_API.Managers
                 Logovi logovi = new(_db);
                 try
                 {  
-                    string uspeh = _sftpService.KreirajFolderNaSFTP(brUputa, IdJson);
+                    string uspeh = _sftpService.KreirajFolderNaSFTP(brUputa);
                     if (uspeh == "Neuspeh") { logovi.LogError(IdJson, "pokusano kreiranje istog foldera"); ; }
                 }
                 catch (Exception ex)
@@ -46,7 +46,7 @@ namespace DZO_IntegracijaUstanovaDokumentacija_API.Managers
                 }
             }
         }
-        public async Task prebaciFajloveAsync()
+        public  void prebaciFajloveAsync()
         {     
              List < DZOI_VratiFajloveZaPrebacivanjeResult > fajlovi =  _db.Procedures.DZOI_VratiFajloveZaPrebacivanjeAsync().Result.ToList();
 

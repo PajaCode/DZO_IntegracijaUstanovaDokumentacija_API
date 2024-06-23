@@ -4,7 +4,6 @@ using HR_API.Helpers;
 using Microsoft.AspNetCore.Mvc;
 using Renci.SshNet.Messages;
 using static System.Net.WebRequestMethods;
-using DZO_IntegracijaUstanovaDokumentacija_API.Helpers;
 using Microsoft.Extensions.Options;
 
 
@@ -24,7 +23,7 @@ namespace DZO_IntegracijaUstanovaDokumentacija_API.Controllers
         }
 
         [HttpGet("upisiFajlove")]
-        public IActionResult upisiFajlove()
+        public IActionResult UpisiFajlove()
         {
             try
             {
@@ -41,7 +40,7 @@ namespace DZO_IntegracijaUstanovaDokumentacija_API.Controllers
 
 
         [HttpGet("parsirajIinsertuj")]
-        public IActionResult parsirajIinsertuj()
+        public IActionResult ParsirajIinsertuj()
         {
             try
             {

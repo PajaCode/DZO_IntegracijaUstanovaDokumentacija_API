@@ -8,7 +8,7 @@ namespace DZO_IntegracijaUstanovaDokumentacija_API.Helpers
     public class GlobosSftpService
     {
         private readonly GlobosSftpSetting _sftpSettings;
-        private SftpClient _sftpClient;
+        private readonly SftpClient _sftpClient;
         public string RemotePath => _sftpSettings.RemotePath;
         public GlobosSftpService(IOptions<GlobosSftpSetting> sftpSettings)
         {
@@ -66,7 +66,7 @@ namespace DZO_IntegracijaUstanovaDokumentacija_API.Helpers
            
         }
 
-        public string  KreirajFolderNaSFTP(string nazivFoldera, int idJson)
+        public string  KreirajFolderNaSFTP(string nazivFoldera)
         {
            
               Connect();

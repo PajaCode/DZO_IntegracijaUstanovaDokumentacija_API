@@ -5,7 +5,7 @@
         public string RacunID { get; set; }
         public DateTime RacunDatum { get; set; }
         public string RacunBrojFiskala { get; set; }
-        public string UputBroj { get; set; }
+        public string? UputBroj { get; set; }
         public string PacijentID { get; set; }
         public decimal IZNOSCLAIM { get; set; }
         public decimal Participacija {  get; set; }
