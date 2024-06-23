@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore.Storage;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace DZO_IntegracijaUstanovaDokumentacija_API.Helpers
 {
@@ -20,6 +21,20 @@ namespace DZO_IntegracijaUstanovaDokumentacija_API.Helpers
                 NazivGreske = error
             });
             _db.SaveChanges();
+        }
+
+        public void AzurirajStatusFajlova(int IdSpec, string NazivFajla, int status)
+        {
+            var redoviZaAzuriranje = _db.DZOI_Vizim_Fajlovi.Where(d => d.IdSpecifikacije == IdSpec && d.NazivFajla == NazivFajla).ToList();
+
+            foreach (var red in redoviZaAzuriranje)
+            {
+                red.StatusId =status;
+                red.DatumPrebacivanja = DateTime.Now;
+            }
+
+            _db.SaveChanges();
+
         }
     }
 }

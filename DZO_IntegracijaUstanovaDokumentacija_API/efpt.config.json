@@ -1,5 +1,5 @@
 ﻿{
-   "CodeGenerationMode": 3,
+   "CodeGenerationMode": 4,
    "ContextClassName": "VizimIntegracijaDb_Context",
    "ContextNamespace": null,
    "DefaultDacpacSchema": null,

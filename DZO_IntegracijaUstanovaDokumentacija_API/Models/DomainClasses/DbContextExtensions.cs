@@ -22,16 +22,7 @@ namespace DZO_IntegracijaUstanovaDokumentacija_API.Models.DomainClasses
 
             if (typeof(T).GetProperties().Any())
             {
-                try
-                {
-                    return await db.Set<T>().FromSqlRaw(sql, parameters).ToListAsync(cancellationToken);
-                }
-                catch (Exception)
-                {
-
-                    throw;
-                }
-                
+                return await db.Set<T>().FromSqlRaw(sql, parameters).ToListAsync(cancellationToken);
             }
             else
             {

@@ -85,35 +85,29 @@ namespace DZO_IntegracijaUstanovaDokumentacija_API.Helpers
 
 
         }
-        public void PrebaciFajlove(string brUputa, int IdSpec , string NazivFajla)
+        public string PrebaciFajlove(string brUputa , string NazivFajla)
         {
-           
+          
+             string putanjaDoFajla = Path.Combine(_sftpSettings.RemotePath, NazivFajla);
+             string putanjaDoFoldera = Path.Combine(_sftpSettings.RemotePath, brUputa);
+             
+             Connect();
 
-           
-                try
+                var files = _sftpClient.ListDirectory(_sftpSettings.RemotePath);
+
+                bool pdfExists = files.Any(f => f.Name == NazivFajla && !f.IsDirectory);
+
+                if (pdfExists)
                 {
-                    string putanjaDoFajla = Path.Combine(_sftpSettings.RemotePath, NazivFajla);
-                    string putanjaDoFoldera = Path.Combine(_sftpSettings.RemotePath, brUputa);
-
-                    // Proveravamo da li fajl postoji pre nego što ga premestimo
-                    if (File.Exists(putanjaDoFajla))
-                    {
-                        // Formiramo putanju za novu lokaciju fajla
-                        string novaPutanjaDoFajla = Path.Combine(putanjaDoFoldera, Path.GetFileName(putanjaDoFajla));
-
-                        // Premestamo fajl
-                        File.Move(putanjaDoFajla, novaPutanjaDoFajla);
-                        //Console.WriteLine($"Fajl '{imeFajla}' uspešno premesten u folder '{putanjaDoFoldera}'.");
-                    }
-                    else
-                    {
-                        //Console.WriteLine($"Fajl '{imeFajla}' ne postoji na zadatoj putanji.");
-                    }
+                    _sftpClient.RenameFile(_sftpSettings.RemotePath, putanjaDoFoldera + pdfExists);
+                    return "Uspeh";
                 }
-                catch (Exception ex)
+                else
                 {
-                   // Console.WriteLine($"Greška prilikom premestanja fajla '{imeFajla}': {ex.Message}");
+                    return "Nespeh";
                 }
+            
+              
             
         }
 

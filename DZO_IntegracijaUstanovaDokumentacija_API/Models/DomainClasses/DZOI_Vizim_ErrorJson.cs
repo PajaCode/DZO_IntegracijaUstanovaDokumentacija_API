@@ -20,6 +20,11 @@ public partial class DZOI_Vizim_ErrorJson
     [Column(TypeName = "datetime")]
     public DateTime? SistemskiDatum { get; set; }
 
+    public int? Sredjeno { get; set; }
+
+    [StringLength(500)]
+    public string Komentar { get; set; }
+
     [ForeignKey("IdJson")]
     [InverseProperty("DZOI_Vizim_ErrorJson")]
     public virtual DZOI_Vizim_Json IdJsonNavigation { get; set; }

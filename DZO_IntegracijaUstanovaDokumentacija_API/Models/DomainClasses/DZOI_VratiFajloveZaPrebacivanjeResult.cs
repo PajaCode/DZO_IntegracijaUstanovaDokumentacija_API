@@ -9,6 +9,7 @@ namespace DZO_IntegracijaUstanovaDokumentacija_API.Models.DomainClasses
     {
         public string UputBroj { get; set; }
         public string NazivFajla { get; set; }
+        public int? IdJson { get; set; }
         public int IdSpec { get; set; }
     }
 }
