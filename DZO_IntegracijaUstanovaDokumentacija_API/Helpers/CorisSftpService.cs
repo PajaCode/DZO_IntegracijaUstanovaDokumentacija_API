@@ -34,42 +34,33 @@ namespace DZO_IntegracijaUstanovaDokumentacija_API.Helpers
             }
         }
 
-        public string PrebaciFoldereSFTP(string naziv) {
+        public  List<string> PrebaciFoldereSFTP(string naziv, string folder) {
 
-            _sftpService.Connect();
-
-            Connect();
-
-            var folders = _sftpService.ListaFoldera();
-
-            foreach (var folder in folders)
+            try
             {
-                try
+                using (var sourceStream = _sftpService._sftpClient.OpenRead(folder))
+                using (var destinationStream = _sftpClientCor.Create($"{_sftpSettingsCor.RemotePath}/{folder}"))
                 {
-                    if (folder.Equals(naziv, StringComparison.OrdinalIgnoreCase))
-                    {
-
-                        using (var sourceStream = _sftpService._sftpClient.OpenRead(folder))
-                        using (var destinationStream = _sftpClientCor.Create($"{_sftpSettingsCor.RemotePath}/{folder}"))
-                        {
-                            sourceStream.CopyTo(destinationStream);
-                        }
-
-                        continue;
-                    }
-                    
-                   
-
+                    sourceStream.CopyTo(destinationStream);
+                    //kopiraj u prebaceno
                 }
-                catch (Exception ex)
-                {
 
-                    return ex.ToString();
-                }
-               
+                
+                return ["uspeh",""];
+
             }
+            catch (Exception ex)
+            {
+                //kopiraj u gresku
+                return ["neuspeh", ex.ToString()];
+            }
+                     
+                    
+                          
+               
+            
 
-            return "kraj";
+       
 
 
 

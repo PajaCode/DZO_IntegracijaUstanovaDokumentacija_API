@@ -36,6 +36,20 @@ namespace DZO_IntegracijaUstanovaDokumentacija_API.Helpers
             _db.SaveChanges();
 
         }
+
+        public void AzurirajStatusFoldera(int IdJson, string NazivFoldera, int status)
+        {
+            var redoviZaAzuriranje = _db.DZOI_Vizim_Folder.Where(d => d.IdJson == IdJson && d.nazivFoldera == NazivFoldera).ToList();
+
+            foreach (var red in redoviZaAzuriranje)
+            {
+                red.StatusId = status;
+                red.DatumPrebacivanja = DateTime.Now;
+            }
+
+            _db.SaveChanges();
+
+        }
     }
 }
 

@@ -17,16 +17,33 @@ namespace DZO_IntegracijaUstanovaDokumentacija_API.Managers
         public void PrebaciFoldere()
         {
             var NazivFoldera = _db.DZOI_Vizim_Folder.Where(d => d.StatusId == 1).ToList();
-
-            foreach (var folder in NazivFoldera)
+            Logovi logovi = new(_db);
+            foreach (var folderzaslanje in NazivFoldera)
             {
-                string naziv = new string(folder.nazivFoldera);
+                string naziv = new string(folderzaslanje.nazivFoldera);
+                int IdJson =  Convert.ToInt32(folderzaslanje.IdJson);
 
                 try
                 {
-                    var uspeh = _sftpServiceCor.PrebaciFoldereSFTP(naziv);
-                    //        if (uspeh == "Neuspeh") { logovi.LogError(IdJson, "fajl ne postoji"); logovi.AzurirajStatusFajlova(idSpec, NazivFajla, 3); }
-                    //        else { logovi.AzurirajStatusFajlova(idSpec, NazivFajla, 2); }
+
+                    _sftpService.Connect();
+
+                    _sftpServiceCor.Connect();
+
+                    var listaFoldera = _sftpService.ListaFoldera();
+
+                    foreach (var folder in listaFoldera)
+                    {
+
+                        if (folder.Equals(naziv, StringComparison.OrdinalIgnoreCase))
+                        {
+
+                            var uspeh = _sftpServiceCor.PrebaciFoldereSFTP(naziv, folder);
+                            if (uspeh[0] == "Neuspeh") { logovi.LogError(IdJson, "nije se kopirao folder:" + uspeh[1]); logovi.AzurirajStatusFoldera(IdJson, naziv, 3); }
+                            else { logovi.AzurirajStatusFoldera(IdJson, naziv, 2); //brisi folder
+                            }
+                        } 
+                    }
 
                 }
                 catch (Exception)
