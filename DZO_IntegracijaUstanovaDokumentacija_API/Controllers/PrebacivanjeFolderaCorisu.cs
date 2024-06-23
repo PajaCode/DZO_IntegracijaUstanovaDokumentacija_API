@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using DZO_IntegracijaUstanovaDokumentacija_API.Helpers;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace DZO_IntegracijaUstanovaDokumentacija_API.Controllers
@@ -7,6 +8,15 @@ namespace DZO_IntegracijaUstanovaDokumentacija_API.Controllers
     [ApiController]
     public class PrebacivanjeFolderaCorisu : ControllerBase
     {
+        private readonly GlobosSftpService _sftpService;
+        private readonly CorisSftpService _sftpServiceCor;
+        private readonly VizimIntegracijaDb_Context _db;
+        public PrebacivanjeFolderaCorisu(GlobosSftpService sftpService, CorisSftpService sftpServiceCor, VizimIntegracijaDb_Context db)
+        {
+            _sftpService = sftpService;
+            _sftpServiceCor = sftpServiceCor;
+            _db = db;
+        }
         [HttpGet("prebaciFoldere")]
         public IActionResult PrebaciFoldere()
         {

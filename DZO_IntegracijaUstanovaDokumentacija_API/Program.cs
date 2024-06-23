@@ -20,6 +20,7 @@ builder.Services.AddDbContext<VizimIntegracijaDb_Context>(options =>
 
 // Konfiguracija GlobosSftpSetting
 builder.Services.Configure<GlobosSftpSetting>(builder.Configuration.GetSection("GlobosSftpSettings"));
+builder.Services.Configure<CorisSftpSetting>(builder.Configuration.GetSection("CorisSftpSettings"));
 
 // Dodavanje GlobosSftpService kao singleton
 builder.Services.AddSingleton<GlobosSftpService>();

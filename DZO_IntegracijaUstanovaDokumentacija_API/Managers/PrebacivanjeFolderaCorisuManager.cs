@@ -4,9 +4,37 @@ namespace DZO_IntegracijaUstanovaDokumentacija_API.Managers
 {
     public class PrebacivanjeFolderaCorisuManager
     {
+        private readonly GlobosSftpService _sftpService;
+        private readonly CorisSftpService _sftpServiceCor;
+        private readonly VizimIntegracijaDb_Context _db;
+        public PrebacivanjeFolderaCorisuManager(GlobosSftpService sftpService, CorisSftpService sftpServiceCor, VizimIntegracijaDb_Context db)
+        {
+            _sftpService = sftpService;
+            _sftpServiceCor = sftpServiceCor;
+            _db = db;
+        }
+
         public void PrebaciFoldere()
         {
-                //List<DZOI_VratiFajloveZaPrebacivanjeResult> fajlovi = _db.Procedures.DZOI_VratiFajloveZaPrebacivanjeAsync().Result.ToList();
+            var NazivFoldera = _db.DZOI_Vizim_Folder.Where(d => d.StatusId == 1).ToList();
+
+            foreach (var folder in NazivFoldera)
+            {
+                string naziv = new string(folder.nazivFoldera);
+
+                try
+                {
+                    var uspeh = _sftpServiceCor.PrebaciFoldere(naziv);
+                    //        if (uspeh == "Neuspeh") { logovi.LogError(IdJson, "fajl ne postoji"); logovi.AzurirajStatusFajlova(idSpec, NazivFajla, 3); }
+                    //        else { logovi.AzurirajStatusFajlova(idSpec, NazivFajla, 2); }
+
+                }
+                catch (Exception)
+                {
+
+                    throw;
+                }
+            }
 
                 //foreach (var item in fajlovi)
                 //{
