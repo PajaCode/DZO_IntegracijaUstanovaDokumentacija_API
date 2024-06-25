@@ -35,39 +35,25 @@ namespace DZO_IntegracijaUstanovaDokumentacija_API.Helpers
             }
         }
 
-        public  List<string> PrebaciFoldereSFTP(string naziv, string folder) {
-
+        public List<string> PrebaciFoldereSFTP(string naziv, string folder)
+        {
             try
             {
                 using (var sourceStream = _sftpService._sftpClient.OpenRead(folder))
                 using (var destinationStream = _sftpClientCor.Create($"{_sftpSettingsCor.RemotePath}/{folder}"))
                 {
                     sourceStream.CopyTo(destinationStream);
-                    //kopiraj u prebaceno
                 }
 
-                
-                return ["uspeh",""];
-
+                return new List<string> { "uspeh", "" };
             }
             catch (Exception ex)
-            {     
-                
-                return ["neuspeh", ex.ToString()];
-                
+            {
+                return new List<string> { "neuspeh", ex.ToString() };
             }
-                     
-                    
-                          
-               
-            
-
-       
-
-
-
         }
-       
+
+
 
 
 

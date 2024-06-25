@@ -74,7 +74,7 @@ namespace DZO_IntegracijaUstanovaDokumentacija_API.Managers
 
                         try
                         {
-                            _ = await InsertPodatakaIzJsona(jsonObject, rezultatItem.Id);
+                            _ =  InsertPodatakaIzJsona(jsonObject, rezultatItem.Id);
                         }
                         catch (Exception ex)
                         {

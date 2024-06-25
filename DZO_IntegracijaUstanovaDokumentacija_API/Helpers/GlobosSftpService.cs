@@ -73,7 +73,7 @@ namespace DZO_IntegracijaUstanovaDokumentacija_API.Helpers
 
             Connect();
 
-            string putanjaDoFoldera = Path.Combine(_sftpSettings.RemotePath, nazivFoldera);
+            string putanjaDoFoldera = _sftpSettings.RemotePath+"/"+nazivFoldera;
 
             if (!_sftpClient.Exists(putanjaDoFoldera))
             {
@@ -92,8 +92,8 @@ namespace DZO_IntegracijaUstanovaDokumentacija_API.Helpers
         public string PrebaciFajlove(string brUputa, string NazivFajla)
         {
 
-            string putanjaDoFajla = Path.Combine(_sftpSettings.RemotePath, NazivFajla);
-            string putanjaDoFoldera = Path.Combine(_sftpSettings.RemotePath, brUputa);
+            string putanjaDoFajla = _sftpSettings.RemotePath + "/" + NazivFajla;
+            string putanjaDoFoldera = _sftpSettings.RemotePath + "/" + brUputa;
 
             Connect();
 
@@ -103,7 +103,7 @@ namespace DZO_IntegracijaUstanovaDokumentacija_API.Helpers
 
             if (pdfExists)
             {
-                _sftpClient.RenameFile(_sftpSettings.RemotePath, putanjaDoFoldera + pdfExists);
+                _sftpClient.RenameFile(putanjaDoFajla, putanjaDoFoldera + "/" + NazivFajla);
                 return "Uspeh";
             }
             else

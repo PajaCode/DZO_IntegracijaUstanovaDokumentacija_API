@@ -18,14 +18,14 @@ namespace DZO_IntegracijaUstanovaDokumentacija_API.Managers
 
         public void kreirajFoldere()
         {
-            var rezultat = from specifikacija in _db.DZOI_Vizim_Specifikacija
+            var rezultat = (from specifikacija in _db.DZOI_Vizim_Specifikacija
                            join racun in _db.DZOI_Vizim_Racun on specifikacija.Id equals racun.IdSpecifikacije
                            where specifikacija.StatusId == 1
             select new
             {
               specifikacija,
               brUputa = racun.UputBroj
-            };
+            }).ToList();
 
             foreach (var item in rezultat)
             {
@@ -35,7 +35,11 @@ namespace DZO_IntegracijaUstanovaDokumentacija_API.Managers
                 try
                 {  
                     string uspeh = _sftpService.KreirajFolderNaSFTP(brUputa);
-                    if (uspeh == "Neuspeh") { logovi.LogError(IdJson, "pokusano kreiranje istog foldera");  }
+                    _sftpService.Disconnect();
+                    if (uspeh == "Neuspeh") 
+                    { 
+                        logovi.LogError(IdJson, "pokusano kreiranje istog foldera");  
+                    }
                     else
                     {
                         var noviRed = new DZOI_Vizim_Folder
