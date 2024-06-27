@@ -72,16 +72,24 @@ namespace DZO_IntegracijaUstanovaDokumentacija_API.Managers
                     {
                         var jsonObject = JsonConvert.DeserializeObject<FileJson>(sadrzajFajla);
 
-                        try
+                        if(jsonObject is null)
                         {
-                            _ =  InsertPodatakaIzJsona(jsonObject, rezultatItem.Id);
+                            logovi.LogError(rezultatItem.Id, "Izabrani JSON je prazan.");
                         }
-                        catch (Exception ex)
+                        else
                         {
+                            try
+                            {
+                                _ = InsertPodatakaIzJsona(jsonObject, rezultatItem.Id);
+                            }
+                            catch (Exception ex)
+                            {
 
-                            logovi.LogError(rezultatItem.Id, ex.Message + "metoda parsirajIinsertuj - insert");
-                            continue;
+                                logovi.LogError(rezultatItem.Id, ex.Message + "metoda parsirajIinsertuj - insert");
+                                continue;
+                            }
                         }
+                        
                     }
                     catch (Exception ex)
                     {
