@@ -28,4 +28,8 @@
     <Using Include="System.Reflection" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="NewFolder1\" />
+  </ItemGroup>
+
 </Project>

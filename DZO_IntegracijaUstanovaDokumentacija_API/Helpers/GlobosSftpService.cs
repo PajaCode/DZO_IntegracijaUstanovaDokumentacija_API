@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using DZO_IntegracijaUstanovaDokumentacija_API.AbstractClasses;
+using DZO_IntegracijaUstanovaDokumentacija_API.Interfaces;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using Renci.SshNet;
 using Renci.SshNet.Sftp;
@@ -7,31 +9,16 @@ using System.IO;
 
 namespace DZO_IntegracijaUstanovaDokumentacija_API.Helpers
 {
-    public class GlobosSftpService
+    public class GlobosSftpService : BaseSftpService
     {
-        private readonly GlobosSftpSetting _sftpSettings;
-        public SftpClient _sftpClient;
-        public string RemotePath => _sftpSettings.RemotePath;
+        
         public GlobosSftpService(IOptions<GlobosSftpSetting> sftpSettings)
+         : base(sftpSettings.Value.Host, sftpSettings.Value.Username, sftpSettings.Value.Password, sftpSettings.Value.RemotePath)
         {
-            _sftpSettings = sftpSettings.Value;
-            _sftpClient = new SftpClient(_sftpSettings.Host, _sftpSettings.Username, _sftpSettings.Password);
-        }
-        public void Connect()
-        {
-            if (!_sftpClient.IsConnected)
-            {
-                _sftpClient.Connect();
-            }
+            
         }
 
-        public void Disconnect()
-        {
-            if (_sftpClient.IsConnected)
-            {
-                _sftpClient.Disconnect();
-            }
-        }
+
 
         public List<string> ListaJsona()
         {
@@ -39,7 +26,7 @@ namespace DZO_IntegracijaUstanovaDokumentacija_API.Helpers
 
             var files = new List<string>();
 
-            var directory = _sftpClient.ListDirectory(_sftpSettings.RemotePath);
+            var directory = _sftpClient.ListDirectory(_remotePath);
             foreach (var fileInfo in directory)
             {
                 if (!fileInfo.IsDirectory && fileInfo.Name.EndsWith(".json", StringComparison.OrdinalIgnoreCase))
@@ -73,7 +60,7 @@ namespace DZO_IntegracijaUstanovaDokumentacija_API.Helpers
 
             Connect();
 
-            string putanjaDoFoldera = Path.Combine(_sftpSettings.RemotePath, nazivFoldera);
+            string putanjaDoFoldera = Path.Combine(_remotePath, nazivFoldera);
 
             if (!_sftpClient.Exists(putanjaDoFoldera))
             {
@@ -92,18 +79,18 @@ namespace DZO_IntegracijaUstanovaDokumentacija_API.Helpers
         public string PrebaciFajlove(string brUputa, string NazivFajla)
         {
 
-            string putanjaDoFajla = Path.Combine(_sftpSettings.RemotePath, NazivFajla);
-            string putanjaDoFoldera = Path.Combine(_sftpSettings.RemotePath, brUputa);
+            string putanjaDoFajla = Path.Combine(_remotePath, NazivFajla);
+            string putanjaDoFoldera = Path.Combine(_remotePath, brUputa);
 
             Connect();
 
-            var files = _sftpClient.ListDirectory(_sftpSettings.RemotePath);
+            var files = _sftpClient.ListDirectory(_remotePath);
 
             bool pdfExists = files.Any(f => f.Name == NazivFajla && !f.IsDirectory);
 
             if (pdfExists)
             {
-                _sftpClient.RenameFile(_sftpSettings.RemotePath, putanjaDoFoldera + pdfExists);
+                _sftpClient.RenameFile(_remotePath, putanjaDoFoldera + pdfExists);
                 return "Uspeh";
             }
             else
@@ -120,7 +107,7 @@ namespace DZO_IntegracijaUstanovaDokumentacija_API.Helpers
             
             Connect();
 
-            var folderi = _sftpClient.ListDirectory(_sftpSettings.RemotePath)
+            var folderi = _sftpClient.ListDirectory(_remotePath)
                                      .Where(f => f.IsDirectory)
                                      .Select(f => f.Name)
                                      .ToList();
