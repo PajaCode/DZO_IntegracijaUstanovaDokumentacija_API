@@ -23,6 +23,20 @@ namespace DZO_IntegracijaUstanovaDokumentacija_API.Helpers
             _db.SaveChanges();
         }
 
+        public void AzurirajStatusVizimJson(int IdJson, int status)
+        {
+            var redoviZaAzuriranje = _db.DZOI_Vizim_Json.Where(d => d.Id == IdJson).ToList();
+
+            foreach (var red in redoviZaAzuriranje)
+            {
+                red.StatusId = status;
+                
+            }
+
+            _db.SaveChanges();
+
+        }
+
         public void AzurirajStatusFajlova(int IdSpec, string NazivFajla, int status)
         {
             var redoviZaAzuriranje = _db.DZOI_Vizim_Fajlovi.Where(d => d.IdSpecifikacije == IdSpec && d.NazivFajla == NazivFajla).ToList();

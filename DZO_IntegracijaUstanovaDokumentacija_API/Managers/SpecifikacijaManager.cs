@@ -82,6 +82,7 @@ namespace DZO_IntegracijaUstanovaDokumentacija_API.Managers
                             try
                             {
                                 _ = InsertPodatakaIzJsona(jsonObject, rezultatItem.Id);
+                                logovi.AzurirajStatusVizimJson(rezultatItem.Id, 3);
                             }
                             catch (Exception ex)
                             {
