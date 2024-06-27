@@ -30,7 +30,7 @@ namespace DZO_IntegracijaUstanovaDokumentacija_API.Managers
             foreach (var item in rezultat)
             {
                 string brUputa = new string(item.brUputa);
-                int IdJson = Convert.ToInt32(item.specifikacija.Id);
+                int IdJson = Convert.ToInt32(item.specifikacija.IdJson);
                 Logovi logovi = new(_db);
                 try
                 {  
@@ -44,6 +44,7 @@ namespace DZO_IntegracijaUstanovaDokumentacija_API.Managers
                     {
                         var noviRed = new DZOI_Vizim_Folder
                         {
+                            IdJson= IdJson,
                             nazivFoldera = brUputa,
                             StatusId = 1
                         };

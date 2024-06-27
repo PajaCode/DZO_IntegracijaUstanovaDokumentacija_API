@@ -39,21 +39,67 @@ namespace DZO_IntegracijaUstanovaDokumentacija_API.Helpers
         {
             try
             {
-                using (var sourceStream = _sftpService._sftpClient.OpenRead(folder))
-                using (var destinationStream = _sftpClientCor.Create($"{_sftpSettingsCor.RemotePath}/{folder}"))
-                {
-                    sourceStream.CopyTo(destinationStream);
-                }
+                _sftpService._sftpClient.Connect();
 
-                return new List<string> { "uspeh", "" };
+                var remotePath = _sftpSettingsCor.RemotePath;
+                var homePath = _sftpService.RemotePath;
+                var destinationPath = $"{remotePath}/{naziv}";
+
+                CreateDirectoryRecursively(destinationPath, _sftpService._sftpClient);
+
+                UploadDirectoryContents(homePath, destinationPath, _sftpService._sftpClient);
+
+                return new List<string> { "uspeh", "" }; // Success
             }
             catch (Exception ex)
             {
-                return new List<string> { "neuspeh", ex.ToString() };
+                return new List<string> { "neuspeh", ex.ToString() }; // Failure
             }
         }
 
+        private void UploadDirectoryContents(string sourcePath, string destinationPath, SftpClient client)
+        {
+            var files = client.ListDirectory(sourcePath);
+            foreach (var file in files)
+            {
+                if (!file.IsDirectory)
+                {
+                    using (var fileStream = client.OpenRead(file.FullName))
+                    {
+                        var remoteFilePath = $"{destinationPath}/{file.Name}";
+                        client.UploadFile(fileStream, remoteFilePath);
+                    }
+                }
+            }
 
+            //foreach (var directory in files.Where(f => f.IsDirectory))
+            //{
+            //    var remoteDirectoryPath = $"{destinationPath}/{directory.Name}";
+
+            //    CreateDirectoryRecursively(remoteDirectoryPath, client);
+            //    UploadDirectoryContents(directory.FullName, remoteDirectoryPath, client);
+            //}
+        }
+
+        private void CreateDirectoryRecursively(string targetPath, SftpClient client)
+        {
+            string currentPath = "";
+            if (targetPath[0] == '.')
+            {
+                currentPath = ".";
+                targetPath = targetPath[1..];
+            }
+            foreach (string segment in targetPath.Split('/'))
+            {
+                // Ignoring leading/ending/multiple slashes
+                if (!string.IsNullOrWhiteSpace(segment))
+                {
+                    currentPath += $"/{segment}";
+                    if (!client.Exists(currentPath))
+                        client.CreateDirectory(currentPath);
+                }
+            }
+        }
 
 
 
