@@ -23,7 +23,7 @@ namespace DZO_IntegracijaUstanovaDokumentacija_API.Managers
             _db = db;
         }
 
-        public void upisiFajlove()
+        public void UpisiFajlove()
         {
             List<string> listaFajlova = new();
             listaFajlova = _sftpService.ListaJsona();
@@ -51,7 +51,7 @@ namespace DZO_IntegracijaUstanovaDokumentacija_API.Managers
             }
         }
 
-        public async Task parsirajIinsertujAsync()
+        public async Task ParsirajIinsertujAsync()
         {
             var rezultat = _db.DZOI_Vizim_Json.Where(x => x.StatusId == 1).ToList();
 

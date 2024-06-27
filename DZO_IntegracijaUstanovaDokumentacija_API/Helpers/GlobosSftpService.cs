@@ -60,7 +60,7 @@ namespace DZO_IntegracijaUstanovaDokumentacija_API.Helpers
 
             Connect();
 
-            string putanjaDoFoldera = _sftpSettings.RemotePath+"/"+nazivFoldera;
+            string putanjaDoFoldera = _remotePath+"/"+nazivFoldera;
 
             if (!_sftpClient.Exists(putanjaDoFoldera))
             {
@@ -79,8 +79,8 @@ namespace DZO_IntegracijaUstanovaDokumentacija_API.Helpers
         public string PrebaciFajlove(string brUputa, string NazivFajla)
         {
 
-            string putanjaDoFajla = _sftpSettings.RemotePath + "/" + NazivFajla;
-            string putanjaDoFoldera = _sftpSettings.RemotePath + "/" + brUputa;
+            string putanjaDoFajla = _remotePath + "/" + NazivFajla;
+            string putanjaDoFoldera = _remotePath + "/" + brUputa;
 
             Connect();
 
@@ -119,6 +119,11 @@ namespace DZO_IntegracijaUstanovaDokumentacija_API.Helpers
 
         }
 
+
+        public string VratiPutanju()
+        {
+            return _remotePath;
+        }
      
 
     }

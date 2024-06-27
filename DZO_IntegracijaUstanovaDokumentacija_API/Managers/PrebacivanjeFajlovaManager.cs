@@ -16,7 +16,7 @@ namespace DZO_IntegracijaUstanovaDokumentacija_API.Managers
         }
 
 
-        public void kreirajFoldere()
+        public void KreirajFoldere()
         {
             var rezultat = (from specifikacija in _db.DZOI_Vizim_Specifikacija
                            join racun in _db.DZOI_Vizim_Racun on specifikacija.Id equals racun.IdSpecifikacije
@@ -61,7 +61,7 @@ namespace DZO_IntegracijaUstanovaDokumentacija_API.Managers
                 }
             }
         }
-        public  void prebaciFajloveAsync()
+        public  void PrebaciFajloveAsync()
         {     
              List < DZOI_VratiFajloveZaPrebacivanjeResult > fajlovi =  _db.Procedures.DZOI_VratiFajloveZaPrebacivanjeAsync().Result.ToList();
 

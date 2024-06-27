@@ -28,7 +28,7 @@ namespace DZO_IntegracijaUstanovaDokumentacija_API.Controllers
             try
             {
                 SpecifikacijaManager manager = new(_sftpService, _db);
-                manager.upisiFajlove();
+                manager.UpisiFajlove();
                 return Ok();
             }
             catch (Exception ex)
@@ -45,7 +45,7 @@ namespace DZO_IntegracijaUstanovaDokumentacija_API.Controllers
             try
             {
                 SpecifikacijaManager manager = new(_sftpService, _db);
-                manager.parsirajIinsertujAsync();
+                manager.ParsirajIinsertujAsync();
                 return Ok();
             }
             catch (Exception ex)

@@ -24,7 +24,7 @@ namespace DZO_IntegracijaUstanovaDokumentacija_API.Controllers
             try
             {
                 PrebacivanjeFajlovaManager manager = new(_sftpService, _db);
-                manager.kreirajFoldere();
+                manager.KreirajFoldere();
                 return Ok();
             }
             catch (Exception ex)
@@ -41,7 +41,7 @@ namespace DZO_IntegracijaUstanovaDokumentacija_API.Controllers
             try
             {
                 PrebacivanjeFajlovaManager manager = new(_sftpService, _db);
-                manager.prebaciFajloveAsync();
+                manager.PrebaciFajloveAsync();
                 return Ok();
             }
             catch (Exception ex)

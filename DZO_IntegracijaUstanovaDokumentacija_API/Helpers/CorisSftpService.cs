@@ -27,8 +27,8 @@ namespace DZO_IntegracijaUstanovaDokumentacija_API.Helpers
             {
                 _sftpService._sftpClient.Connect();
 
-                var remotePath = _sftpSettingsCor.RemotePath;
-                var homePath = _sftpService.RemotePath;
+                var remotePath = _remotePath;
+                var homePath = _sftpService.VratiPutanju();
                 var destinationPath = $"{remotePath}/{naziv}";
 
                 CreateDirectoryRecursively(destinationPath, _sftpService._sftpClient);
@@ -58,13 +58,7 @@ namespace DZO_IntegracijaUstanovaDokumentacija_API.Helpers
                 }
             }
 
-            //foreach (var directory in files.Where(f => f.IsDirectory))
-            //{
-            //    var remoteDirectoryPath = $"{destinationPath}/{directory.Name}";
-
-            //    CreateDirectoryRecursively(remoteDirectoryPath, client);
-            //    UploadDirectoryContents(directory.FullName, remoteDirectoryPath, client);
-            //}
+            
         }
 
         private void CreateDirectoryRecursively(string targetPath, SftpClient client)
