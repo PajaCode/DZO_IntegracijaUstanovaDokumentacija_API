@@ -75,6 +75,7 @@ namespace DZO_IntegracijaUstanovaDokumentacija_API.Managers
                         if(jsonObject is null)
                         {
                             logovi.LogError(rezultatItem.Id, "Izabrani JSON je prazan.");
+                            continue;
                         }
                         else
                         {
