@@ -35,7 +35,7 @@ namespace DZO_IntegracijaUstanovaDokumentacija_API.Helpers
                 }
             }
 
-
+            Disconnect();
 
             return files;
         }
@@ -48,10 +48,11 @@ namespace DZO_IntegracijaUstanovaDokumentacija_API.Helpers
                 using (var reader = new StreamReader(stream))
                 {
                     return reader.ReadToEnd();
+                    
                 }
-
+                
             }
-
+           
 
         }
 
