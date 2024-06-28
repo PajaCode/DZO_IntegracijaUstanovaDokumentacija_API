@@ -25,7 +25,7 @@ builder.Services.Configure<CorisSftpSetting>(builder.Configuration.GetSection("C
 // Dodavanje GlobosSftpService kao singleton
 builder.Services.AddSingleton<GlobosSftpService>();
 builder.Services.AddSingleton<CorisSftpService>();
-builder.Services.AddSingleton<Logovi>();
+
 
 builder.Services.AddScoped<Logovi>();
 
