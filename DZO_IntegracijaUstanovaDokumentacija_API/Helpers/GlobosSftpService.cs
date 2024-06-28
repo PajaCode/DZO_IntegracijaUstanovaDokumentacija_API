@@ -13,7 +13,7 @@ namespace DZO_IntegracijaUstanovaDokumentacija_API.Helpers
     {
         
         public GlobosSftpService(IOptions<GlobosSftpSetting> sftpSettings)
-         : base(sftpSettings.Value.Host, sftpSettings.Value.Username, sftpSettings.Value.Password, sftpSettings.Value.RemotePath)
+         : base(sftpSettings.Value.Host, sftpSettings.Value.Port ,sftpSettings.Value.Username, sftpSettings.Value.Password, sftpSettings.Value.RemotePath)
         {
             
         }

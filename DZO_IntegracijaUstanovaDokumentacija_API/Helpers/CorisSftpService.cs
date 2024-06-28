@@ -14,7 +14,7 @@ namespace DZO_IntegracijaUstanovaDokumentacija_API.Helpers
         private readonly GlobosSftpService _sftpService;
        
         public CorisSftpService(IOptions<CorisSftpSetting> sftpSettings, GlobosSftpService sftpService)
-            :base(sftpSettings.Value.Host, sftpSettings.Value.Username, sftpSettings.Value.Password, sftpSettings.Value.RemotePath)
+            :base(sftpSettings.Value.Host,sftpSettings.Value.Port ,sftpSettings.Value.Username, sftpSettings.Value.Password, sftpSettings.Value.RemotePath)
         {
             
             _sftpService = sftpService;   
@@ -28,12 +28,12 @@ namespace DZO_IntegracijaUstanovaDokumentacija_API.Helpers
                 _sftpService._sftpClient.Connect();
 
                 var remotePath = _remotePath;
-                var homePath = _sftpService._remotePath;
+                var homePath = $"{_sftpService._remotePath}/{naziv}";
                 var destinationPath = $"{remotePath}/{naziv}";
 
-                CreateDirectoryRecursively(destinationPath, _sftpService._sftpClient);
+                CreateDirectoryRecursively(destinationPath, _sftpClient);
 
-                UploadDirectoryContents(homePath, destinationPath, _sftpService._sftpClient);
+                UploadDirectoryContents(homePath, destinationPath);
 
                 return new List<string> { "uspeh", "" }; // Success
             }
@@ -43,17 +43,17 @@ namespace DZO_IntegracijaUstanovaDokumentacija_API.Helpers
             }
         }
 
-        private void UploadDirectoryContents(string sourcePath, string destinationPath, SftpClient client)
+        private void UploadDirectoryContents(string sourcePath, string destinationPath)
         {
-            var files = client.ListDirectory(sourcePath);
+            var files = _sftpService._sftpClient.ListDirectory(sourcePath);
             foreach (var file in files)
             {
                 if (!file.IsDirectory)
                 {
-                    using (var fileStream = client.OpenRead(file.FullName))
+                    using (var fileStream = _sftpService._sftpClient.OpenRead(file.FullName))
                     {
                         var remoteFilePath = $"{destinationPath}/{file.Name}";
-                        client.UploadFile(fileStream, remoteFilePath);
+                        _sftpClient.UploadFile(fileStream, remoteFilePath);
                     }
                 }
             }

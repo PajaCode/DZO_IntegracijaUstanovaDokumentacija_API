@@ -8,9 +8,9 @@ namespace DZO_IntegracijaUstanovaDokumentacija_API.AbstractClasses
         public SftpClient _sftpClient;
         public string _remotePath;
 
-        public BaseSftpService(string host, string username, string password, string remotePath)
+        public BaseSftpService(string host, int port ,string username, string password, string remotePath)
         {
-            _sftpClient = new SftpClient(host, username, password);
+            _sftpClient = new SftpClient(host,port, username, password);
             _remotePath = remotePath;
         }
 
