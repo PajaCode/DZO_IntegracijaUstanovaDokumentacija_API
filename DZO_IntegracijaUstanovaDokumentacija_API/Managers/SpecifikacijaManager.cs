@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
+using System.Globalization;
 using System.Net.Http.Json;
 using System.Text.Json.Nodes;
 
@@ -56,7 +57,10 @@ namespace DZO_IntegracijaUstanovaDokumentacija_API.Managers
         public async Task ParsirajIinsertujAsync()
         {
             var rezultat = _db.DZOI_Vizim_Json.Where(x => x.StatusId == 1).ToList();
-
+            var settings = new JsonSerializerSettings
+            {
+                Culture = CultureInfo.GetCultureInfo("sr-Latn-RS")
+            };
 
             try
             {
@@ -72,7 +76,8 @@ namespace DZO_IntegracijaUstanovaDokumentacija_API.Managers
                   
                     try
                     {
-                        var jsonObject = JsonConvert.DeserializeObject<FileJson>(sadrzajFajla);
+                        
+                        var jsonObject = JsonConvert.DeserializeObject<FileJson>(sadrzajFajla,settings);
 
                         if(jsonObject is null)
                         {
