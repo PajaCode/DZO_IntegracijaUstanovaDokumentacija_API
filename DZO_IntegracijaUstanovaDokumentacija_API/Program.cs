@@ -27,6 +27,8 @@ builder.Services.AddSingleton<GlobosSftpService>();
 builder.Services.AddSingleton<CorisSftpService>();
 builder.Services.AddSingleton<Logovi>();
 
+builder.Services.AddScoped<Logovi>();
+
 // Dodavanje ostalih servisa
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
