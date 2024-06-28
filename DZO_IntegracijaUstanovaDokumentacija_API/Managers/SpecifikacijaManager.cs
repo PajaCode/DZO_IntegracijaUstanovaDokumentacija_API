@@ -17,10 +17,12 @@ namespace DZO_IntegracijaUstanovaDokumentacija_API.Managers
     {
         private readonly GlobosSftpService _sftpService;
         private readonly VizimIntegracijaDb_Context _db;
-        public SpecifikacijaManager(GlobosSftpService sftpService, VizimIntegracijaDb_Context db)
+        private readonly Logovi _logger;
+        public SpecifikacijaManager(GlobosSftpService sftpService, VizimIntegracijaDb_Context db, Logovi logger)
         {
             _sftpService = sftpService;
             _db = db;
+            _logger = logger;
         }
 
         public void UpisiFajlove()
@@ -67,27 +69,27 @@ namespace DZO_IntegracijaUstanovaDokumentacija_API.Managers
 
                     string sadrzajFajla = _sftpService.UzmiSadrzajFajla(nazivString);
                     _sftpService.Disconnect();
-                    Logovi logovi = new(_db);
+                  
                     try
                     {
                         var jsonObject = JsonConvert.DeserializeObject<FileJson>(sadrzajFajla);
 
                         if(jsonObject is null)
                         {
-                            logovi.LogError(rezultatItem.Id, "Izabrani JSON je prazan.");
+                             _logger.LogError(rezultatItem.Id, "Izabrani JSON je prazan.");
                             continue;
                         }
                         else
                         {
                             try
                             {
-                                _ = await InsertPodatakaIzJsona(jsonObject, rezultatItem.Id);
-                                logovi.AzurirajStatusVizimJson(rezultatItem.Id, 2);
+                                _ = InsertPodatakaIzJsona(jsonObject, rezultatItem.Id).Result;
+                                _logger.AzurirajStatusVizimJson(rezultatItem.Id, 2);
                             }
                             catch (Exception ex)
                             {
 
-                                logovi.LogError(rezultatItem.Id, ex.Message + "metoda parsirajIinsertuj - insert");
+                                _logger.LogError(rezultatItem.Id, ex.Message + "metoda parsirajIinsertuj - insert");
                                 continue;
                             }
                         }
@@ -96,7 +98,7 @@ namespace DZO_IntegracijaUstanovaDokumentacija_API.Managers
                     catch (Exception ex)
                     {
 
-                        logovi.LogError(rezultatItem.Id, ex.Message + "metoda parsirajIinsertuj - parsiranje JSON-a");
+                        _logger.LogError(rezultatItem.Id, ex.Message + "metoda parsirajIinsertuj - parsiranje JSON-a");
                         continue;
                     }
 

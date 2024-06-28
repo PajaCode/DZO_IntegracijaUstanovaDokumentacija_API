@@ -11,10 +11,12 @@ namespace DZO_IntegracijaUstanovaDokumentacija_API.Controllers
     {
         private readonly GlobosSftpService _sftpService;
         private readonly VizimIntegracijaDb_Context _db;
-        public PrebacivanjeFajlova(GlobosSftpService sftpService, VizimIntegracijaDb_Context db)
+        private readonly Logovi _logger;
+        public PrebacivanjeFajlova(GlobosSftpService sftpService, VizimIntegracijaDb_Context db, Logovi logger)
         {
             _sftpService = sftpService;
             _db = db;
+            _logger = logger;   
         }
 
 
@@ -23,7 +25,7 @@ namespace DZO_IntegracijaUstanovaDokumentacija_API.Controllers
         {
             try
             {
-                PrebacivanjeFajlovaManager manager = new(_sftpService, _db);
+                PrebacivanjeFajlovaManager manager = new(_sftpService, _db, _logger);
                 manager.KreirajFoldere();
                 return Ok();
             }
@@ -40,7 +42,7 @@ namespace DZO_IntegracijaUstanovaDokumentacija_API.Controllers
         {
             try
             {
-                PrebacivanjeFajlovaManager manager = new(_sftpService, _db);
+                PrebacivanjeFajlovaManager manager = new(_sftpService, _db, _logger);
                 manager.PrebaciFajloveAsync();
                 return Ok();
             }

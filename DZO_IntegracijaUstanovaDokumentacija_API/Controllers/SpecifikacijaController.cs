@@ -16,10 +16,12 @@ namespace DZO_IntegracijaUstanovaDokumentacija_API.Controllers
 
         private readonly GlobosSftpService _sftpService;
         private readonly VizimIntegracijaDb_Context _db;
-        public SpecifikacijaController(GlobosSftpService sftpService, VizimIntegracijaDb_Context db)
+        private readonly Logovi _logger;
+        public SpecifikacijaController(GlobosSftpService sftpService, VizimIntegracijaDb_Context db, Logovi logger)
         {
             _sftpService = sftpService; 
             _db = db;
+            _logger = logger;
         }
 
         [HttpGet("upisiFajlove")]
@@ -27,7 +29,7 @@ namespace DZO_IntegracijaUstanovaDokumentacija_API.Controllers
         {
             try
             {
-                SpecifikacijaManager manager = new(_sftpService, _db);
+                SpecifikacijaManager manager = new(_sftpService, _db, _logger);
                 manager.UpisiFajlove();
                 return Ok();
             }
@@ -44,7 +46,7 @@ namespace DZO_IntegracijaUstanovaDokumentacija_API.Controllers
         {
             try
             {
-                SpecifikacijaManager manager = new(_sftpService, _db);
+                SpecifikacijaManager manager = new(_sftpService, _db, _logger);
                 manager.ParsirajIinsertujAsync();
                 return Ok();
             }
