@@ -28,7 +28,7 @@ namespace DZO_IntegracijaUstanovaDokumentacija_API.Helpers
                 _sftpService._sftpClient.Connect();
 
                 var remotePath = _remotePath;
-                var homePath = _sftpService.VratiPutanju();
+                var homePath = _sftpService._remotePath;
                 var destinationPath = $"{remotePath}/{naziv}";
 
                 CreateDirectoryRecursively(destinationPath, _sftpService._sftpClient);

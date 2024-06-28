@@ -6,7 +6,7 @@ namespace DZO_IntegracijaUstanovaDokumentacija_API.AbstractClasses
     public abstract class BaseSftpService : ISftpService
     {
         public SftpClient _sftpClient;
-        protected string _remotePath;
+        public string _remotePath;
 
         public BaseSftpService(string host, string username, string password, string remotePath)
         {
