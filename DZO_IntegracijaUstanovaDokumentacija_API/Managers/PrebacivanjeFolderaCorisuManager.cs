@@ -40,7 +40,7 @@ namespace DZO_IntegracijaUstanovaDokumentacija_API.Managers
                         if (folder.Equals(naziv, StringComparison.OrdinalIgnoreCase))
                         {
 
-                            var uspeh = _sftpServiceCor.PrebaciFoldereSFTP(naziv, folder);
+                            var uspeh = _sftpServiceCor.PrebaciFoldereSFTP(naziv);
                             if (uspeh[0] == "Neuspeh") {
                                 _logger.LogError(IdJson, "nije se kopirao folder:" + uspeh[1]); _logger.AzurirajStatusFoldera(IdJson, naziv, 3);//kopiraj u gresku
                                 continue; }
