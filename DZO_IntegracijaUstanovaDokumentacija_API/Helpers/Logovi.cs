@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore.Storage;
 using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace DZO_IntegracijaUstanovaDokumentacija_API.Helpers
 {
@@ -60,6 +61,29 @@ namespace DZO_IntegracijaUstanovaDokumentacija_API.Helpers
                 red.StatusId = status;
                 red.DatumPrebacivanja = DateTime.Now;
             }
+
+            _db.SaveChanges();
+
+        }
+
+
+        public void AzurirajStatusspecifikacije(int IdJson, string error)
+        {
+            var redoviZaAzuriranje = _db.DZOI_Vizim_Specifikacija.Where(d => d.IdJson == IdJson ).ToList();
+
+            foreach (var red in redoviZaAzuriranje)
+            {
+                red.StatusId = 3;
+                
+            }
+
+
+            _db.DZOI_Vizim_ErrorJson.Add(new DZOI_Vizim_ErrorJson
+            {
+                IdJson = IdJson,
+                NazivGreske = error
+            });
+            _db.SaveChanges();
 
             _db.SaveChanges();
 
