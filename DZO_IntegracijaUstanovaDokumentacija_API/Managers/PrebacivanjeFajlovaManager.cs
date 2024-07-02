@@ -67,7 +67,12 @@ namespace DZO_IntegracijaUstanovaDokumentacija_API.Managers
         {     
              List < DZOI_VratiFajloveZaPrebacivanjeResult > fajlovi =  _db.Procedures.DZOI_VratiFajloveZaPrebacivanjeAsync().Result.ToList();
 
-            foreach (var item in fajlovi)
+            var grupisaniFajlovi = fajlovi.GroupBy(f => f.IdJson);
+
+            foreach (var grupa in grupisaniFajlovi)
+            { 
+
+            foreach (var item in grupa)
             {
                 string brUputa = new string(item.UputBroj);
                 int IdJson = Convert.ToInt32(item.IdJson);
@@ -79,6 +84,7 @@ namespace DZO_IntegracijaUstanovaDokumentacija_API.Managers
                     var uspeh =  _sftpService.PrebaciFajlove(brUputa,NazivFajla);
                     if (uspeh == false) { _logger.LogError(IdJson, "fajl ili folder ne postoji"); _logger.AzurirajStatusFajlova(idSpec, NazivFajla, 3);
                         _logger.AzurirajStatusspecifikacije(IdJson, 3);
+                            break;
                     }
                     else { _logger.AzurirajStatusFajlova(idSpec, NazivFajla, 2);  _logger.AzurirajStatusspecifikacije(IdJson,2); }
                 }
@@ -88,10 +94,11 @@ namespace DZO_IntegracijaUstanovaDokumentacija_API.Managers
                     _logger.LogError(IdJson, "desila se greska prilikom prebacivanja fajla:" + ex);
                     _logger.AzurirajStatusFajlova(idSpec, NazivFajla, 3);
                     _logger.AzurirajStatusspecifikacije(IdJson, 3);
+                     continue;
                 }
 
             }
-
+            }
         }
     }
 }

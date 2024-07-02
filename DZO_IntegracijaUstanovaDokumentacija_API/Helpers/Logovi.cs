@@ -85,7 +85,7 @@ namespace DZO_IntegracijaUstanovaDokumentacija_API.Helpers
             });
             _db.SaveChanges();
 
-            _db.SaveChanges();
+            
 
         }
 
@@ -98,7 +98,7 @@ namespace DZO_IntegracijaUstanovaDokumentacija_API.Helpers
                 red.StatusId = status;
 
             }
-
+            _db.SaveChanges();
 
         }
     }
