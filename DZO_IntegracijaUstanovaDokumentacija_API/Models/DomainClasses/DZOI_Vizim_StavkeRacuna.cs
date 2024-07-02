@@ -28,7 +28,7 @@ public partial class DZOI_Vizim_StavkeRacuna
     public decimal? PunaCena { get; set; }
 
     [Column(TypeName = "decimal(18, 2)")]
-    public decimal? ZaIsplatu { get; set; }
+    public decimal? ZaUplatu { get; set; }
 
     [StringLength(64)]
     public string Valuta { get; set; }

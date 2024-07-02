@@ -67,7 +67,7 @@ namespace DZO_IntegracijaUstanovaDokumentacija_API.Helpers
         }
 
 
-        public void AzurirajStatusspecifikacije(int IdJson, string error)
+        public void AzurirajStatusspecifikacije(int IdJson, string error )
         {
             var redoviZaAzuriranje = _db.DZOI_Vizim_Specifikacija.Where(d => d.IdJson == IdJson ).ToList();
 
@@ -89,13 +89,13 @@ namespace DZO_IntegracijaUstanovaDokumentacija_API.Helpers
 
         }
 
-        public void AzurirajStatusspecifikacije(int IdJson)
+        public void AzurirajStatusspecifikacije(int IdJson, int status)
         {
             var redoviZaAzuriranje = _db.DZOI_Vizim_Specifikacija.Where(d => d.IdJson == IdJson).ToList();
 
             foreach (var red in redoviZaAzuriranje)
             {
-                red.StatusId = 2;
+                red.StatusId = status;
 
             }
 

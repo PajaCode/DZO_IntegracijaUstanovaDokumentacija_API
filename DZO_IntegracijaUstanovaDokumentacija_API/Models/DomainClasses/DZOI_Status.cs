@@ -16,8 +16,6 @@ public partial class DZOI_Status
     [StringLength(512)]
     public string Naziv { get; set; }
 
-    public int? Oznaka { get; set; }
-
     [InverseProperty("Status")]
     public virtual ICollection<DZOI_Vizim_Fajlovi> DZOI_Vizim_Fajlovi { get; set; } = new List<DZOI_Vizim_Fajlovi>();
 

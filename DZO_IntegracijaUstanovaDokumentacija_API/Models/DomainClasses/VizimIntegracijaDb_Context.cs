@@ -89,9 +89,9 @@ public partial class VizimIntegracijaDb_Context : DbContext
 
         modelBuilder.Entity<DZOI_Vizim_StavkeRacuna>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__DZOI_Viz__3214EC079A0EC4B1");
+            entity.HasKey(e => e.Id).HasName("PK__DZOI_Viz__3214EC072EE859E7");
 
-            entity.HasOne(d => d.IdRacunaNavigation).WithMany(p => p.DZOI_Vizim_StavkeRacuna).HasConstraintName("FK__DZOI_Vizi__IdRac__4D94879B");
+            entity.HasOne(d => d.IdRacunaNavigation).WithMany(p => p.DZOI_Vizim_StavkeRacuna).HasConstraintName("FK__DZOI_Vizi__IdRac__6A30C649");
         });
 
         OnModelCreatingGeneratedProcedures(modelBuilder);
