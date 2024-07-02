@@ -87,6 +87,7 @@ namespace DZO_IntegracijaUstanovaDokumentacija_API.Managers
 
                     _logger.LogError(IdJson, "desila se greska prilikom prebacivanja fajla:" + ex);
                     _logger.AzurirajStatusFajlova(idSpec, NazivFajla, 3);
+                    _logger.AzurirajStatusspecifikacije(IdJson, 3);
                 }
 
             }
