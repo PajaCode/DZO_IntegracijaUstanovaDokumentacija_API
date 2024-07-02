@@ -86,7 +86,9 @@ namespace DZO_IntegracijaUstanovaDokumentacija_API.Managers
                         _logger.AzurirajStatusspecifikacije(IdJson, 3);
                             break;
                     }
-                    else { _logger.AzurirajStatusFajlova(idSpec, NazivFajla, 2);  _logger.AzurirajStatusspecifikacije(IdJson,2); }
+                    else { _logger.AzurirajStatusFajlova(idSpec, NazivFajla, 2);  _logger.AzurirajStatusspecifikacije(IdJson,2);
+                            _logger.AzurirajStatusFoldera(IdJson, brUputa, 4);
+                        }
                 }
                 catch (Exception ex)
                 {

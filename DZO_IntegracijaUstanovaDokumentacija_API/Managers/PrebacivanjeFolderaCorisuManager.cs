@@ -18,7 +18,7 @@ namespace DZO_IntegracijaUstanovaDokumentacija_API.Managers
 
         public void PrebaciFoldere()
         {
-            var NazivFoldera = _db.DZOI_Vizim_Folder.Where(d => d.StatusId == 1).ToList();
+            var NazivFoldera = _db.DZOI_Vizim_Folder.Where(d => d.StatusId == 4).ToList();
            
             foreach (var folderzaslanje in NazivFoldera)
             {
