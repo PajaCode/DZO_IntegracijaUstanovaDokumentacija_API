@@ -46,7 +46,7 @@ namespace DZO_IntegracijaUstanovaDokumentacija_API.Managers
                                 _logger.LogError(IdJson, "nije se kopirao folder:" + uspeh[1], IdSpec,5); _logger.AzurirajStatusFoldera(IdJson, naziv, 3);//kopiraj u gresku
                                 continue; }
                             else {
-                                _logger.AzurirajStatusFoldera(IdJson, naziv, 2); //brisi folder
+                                _logger.AzurirajStatusFoldera(IdJson, naziv, 2); 
                             }
                         } 
                     }
