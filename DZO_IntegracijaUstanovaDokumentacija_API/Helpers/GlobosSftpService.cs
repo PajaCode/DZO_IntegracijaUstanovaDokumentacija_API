@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using Renci.SshNet;
 using Renci.SshNet.Sftp;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 
@@ -77,7 +78,7 @@ namespace DZO_IntegracijaUstanovaDokumentacija_API.Helpers
 
 
         }
-        public string PrebaciFajlove(string brUputa, string NazivFajla)
+        public bool PrebaciFajlove(string brUputa, string NazivFajla)
         {
 
             string putanjaDoFajla = _remotePath + "/" + NazivFajla;
@@ -89,15 +90,24 @@ namespace DZO_IntegracijaUstanovaDokumentacija_API.Helpers
 
             bool pdfExists = files.Any(f => f.Name == NazivFajla && !f.IsDirectory);
 
-            if (pdfExists)
+            if (_sftpClient.Exists(putanjaDoFoldera))
             {
-                _sftpClient.RenameFile(putanjaDoFajla, putanjaDoFoldera + "/" + NazivFajla);
-                return "Uspeh";
+                if (pdfExists)
+                {
+                    _sftpClient.RenameFile(putanjaDoFajla, putanjaDoFoldera + "/" + NazivFajla);
+                    return true ;
+                }
+                else
+                {
+                    return false;
+                }
             }
             else
             {
-                return "Nespeh";
+                return false;
             }
+
+         
 
 
 
