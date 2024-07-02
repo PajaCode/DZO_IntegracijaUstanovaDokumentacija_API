@@ -69,7 +69,7 @@ namespace DZO_IntegracijaUstanovaDokumentacija_API.Helpers
         }
 
 
-        public void AzurirajStatusspecifikacije(int IdJson, string error )
+        public void AzurirajStatusspecifikacije(int IdJson, string error , int IdMetoda)
         {
             var redoviZaAzuriranje = _db.DZOI_Vizim_Specifikacija.Where(d => d.IdJson == IdJson ).ToList();
 
@@ -83,7 +83,8 @@ namespace DZO_IntegracijaUstanovaDokumentacija_API.Helpers
             _db.DZOI_Vizim_ErrorJson.Add(new DZOI_Vizim_ErrorJson
             {
                 IdJson = IdJson,
-                NazivGreske = error
+                NazivGreske = error,
+                IdMetoda = IdMetoda
             });
             _db.SaveChanges();
 

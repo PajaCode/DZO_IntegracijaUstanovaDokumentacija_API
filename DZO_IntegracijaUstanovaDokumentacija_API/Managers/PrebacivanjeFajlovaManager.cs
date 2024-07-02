@@ -41,7 +41,7 @@ namespace DZO_IntegracijaUstanovaDokumentacija_API.Managers
                     _sftpService.Disconnect();
                     if (uspeh == "Neuspeh") 
                     { 
-                        _logger.AzurirajStatusspecifikacije(IdJson, "pokusano kreiranje istog foldera");  
+                        _logger.AzurirajStatusspecifikacije(IdJson, "pokusano kreiranje istog foldera", 3);  
                     }
                     else
                     {
@@ -61,7 +61,7 @@ namespace DZO_IntegracijaUstanovaDokumentacija_API.Managers
                 catch (Exception ex)
                 {
 
-                    _logger.AzurirajStatusspecifikacije(IdJson, "desila se greska prilikom kreiranja foldera:"+ex);
+                    _logger.AzurirajStatusspecifikacije(IdJson, "desila se greska prilikom kreiranja foldera:"+ex, 3);
                 }
             }
         }
