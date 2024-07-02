@@ -81,7 +81,7 @@ namespace DZO_IntegracijaUstanovaDokumentacija_API.Managers
 
                         if(jsonObject is null)
                         {
-                             _logger.LogError(rezultatItem.Id, "Izabrani JSON je prazan.", 0);
+                             _logger.LogError(rezultatItem.Id, "Izabrani JSON je prazan.", 0,2);
                             continue;
                         }
                         else
@@ -94,7 +94,7 @@ namespace DZO_IntegracijaUstanovaDokumentacija_API.Managers
                             catch (Exception ex)
                             {
 
-                                _logger.LogError(rezultatItem.Id, ex.Message + "metoda parsirajIinsertuj - insert",0);
+                                _logger.LogError(rezultatItem.Id, ex.Message + "metoda parsirajIinsertuj - insert",0,2);
                                 continue;
                             }
                         }
@@ -103,7 +103,7 @@ namespace DZO_IntegracijaUstanovaDokumentacija_API.Managers
                     catch (Exception ex)
                     {
 
-                        _logger.LogError(rezultatItem.Id, ex.Message + "metoda parsirajIinsertuj - parsiranje JSON-a",0);
+                        _logger.LogError(rezultatItem.Id, ex.Message + "metoda parsirajIinsertuj - parsiranje JSON-a",0,2);
                         continue;
                     }
 

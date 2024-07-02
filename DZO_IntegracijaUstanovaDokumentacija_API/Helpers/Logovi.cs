@@ -12,7 +12,7 @@ namespace DZO_IntegracijaUstanovaDokumentacija_API.Helpers
         {
             _db = db;
         }
-        public  void LogError(int fileId, string error , int IdSpec)
+        public  void LogError(int fileId, string error , int IdSpec , int IdMetoda)
         {   
             DZOI_Vizim_Json jSon = _db.DZOI_Vizim_Json.Where(j => j.Id == fileId).FirstOrDefault();
             jSon.StatusId = 3;
@@ -20,7 +20,8 @@ namespace DZO_IntegracijaUstanovaDokumentacija_API.Helpers
             {
                 IdJson = fileId,
                 NazivGreske = error,
-                IdSpec = IdSpec
+                IdSpec = IdSpec,
+                IdMetoda = IdMetoda
             });
             _db.SaveChanges();
         }

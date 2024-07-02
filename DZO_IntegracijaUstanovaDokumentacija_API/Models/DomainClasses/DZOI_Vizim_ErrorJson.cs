@@ -27,6 +27,8 @@ public partial class DZOI_Vizim_ErrorJson
 
     public int? IdSpec { get; set; }
 
+    public int? IdMetoda { get; set; }
+
     [ForeignKey("IdJson")]
     [InverseProperty("DZOI_Vizim_ErrorJson")]
     public virtual DZOI_Vizim_Json IdJsonNavigation { get; set; }
