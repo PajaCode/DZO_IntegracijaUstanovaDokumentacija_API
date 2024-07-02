@@ -88,6 +88,19 @@ namespace DZO_IntegracijaUstanovaDokumentacija_API.Helpers
             _db.SaveChanges();
 
         }
+
+        public void AzurirajStatusspecifikacije(int IdJson)
+        {
+            var redoviZaAzuriranje = _db.DZOI_Vizim_Specifikacija.Where(d => d.IdJson == IdJson).ToList();
+
+            foreach (var red in redoviZaAzuriranje)
+            {
+                red.StatusId = 2;
+
+            }
+
+
+        }
     }
 }
 
