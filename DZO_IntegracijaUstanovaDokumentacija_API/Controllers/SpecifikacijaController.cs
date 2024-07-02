@@ -24,13 +24,13 @@ namespace DZO_IntegracijaUstanovaDokumentacija_API.Controllers
             _logger = logger;
         }
 
-        [HttpGet("upisiFajlove")]
-        public IActionResult UpisiFajlove()
+        [HttpGet("upisiJsone")]
+        public IActionResult UpisiJsone()
         {
             try
             {
                 SpecifikacijaManager manager = new(_sftpService, _db, _logger);
-                manager.UpisiFajlove();
+                manager.UpisiJsone();
                 return Ok();
             }
             catch (Exception ex)

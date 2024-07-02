@@ -26,7 +26,7 @@ namespace DZO_IntegracijaUstanovaDokumentacija_API.Managers
             _logger = logger;
         }
 
-        public void UpisiFajlove()
+        public void UpisiJsone()
         {
             List<string> listaFajlova = new();
             listaFajlova = _sftpService.ListaJsona();
