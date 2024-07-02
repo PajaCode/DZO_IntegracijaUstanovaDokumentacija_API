@@ -85,7 +85,7 @@ namespace DZO_IntegracijaUstanovaDokumentacija_API.Managers
                 {
                     var uspeh =  _sftpService.PrebaciFajlove(brUputa,NazivFajla);
                     if (uspeh == false) { _logger.LogError(IdJson, "fajl ili folder ne postoji", idSpec,4); _logger.AzurirajStatusFajlova(idSpec, NazivFajla, 3);
-                        _logger.AzurirajStatusspecifikacije(IdJson, 3);
+                        _logger.AzurirajStatusspecifikacije(IdJson, 3); _logger.AzurirajStatusFoldera(IdJson, brUputa, 1);
                             break;
                     }
                     else { _logger.AzurirajStatusFajlova(idSpec, NazivFajla, 2);  _logger.AzurirajStatusspecifikacije(IdJson,2);
