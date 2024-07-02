@@ -33,7 +33,8 @@ namespace DZO_IntegracijaUstanovaDokumentacija_API.Managers
             {
                 string brUputa = new string(item.brUputa);
                 int IdJson = Convert.ToInt32(item.specifikacija.IdJson);
-               
+                int IdSpec = Convert.ToInt32(item.specifikacija.Id);
+
                 try
                 {  
                     string uspeh = _sftpService.KreirajFolderNaSFTP(brUputa);
@@ -48,7 +49,8 @@ namespace DZO_IntegracijaUstanovaDokumentacija_API.Managers
                         {
                             IdJson= IdJson,
                             nazivFoldera = brUputa,
-                            StatusId = 1
+                            StatusId = 1,
+                            IdSpec = IdSpec
                         };
                         _db.DZOI_Vizim_Folder.Add(noviRed);
                         _db.SaveChanges();
