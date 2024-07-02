@@ -23,6 +23,8 @@ public partial class DZOI_Vizim_Folder
 
     public int? IdJson { get; set; }
 
+    public int? IdSpec { get; set; }
+
     [ForeignKey("StatusId")]
     [InverseProperty("DZOI_Vizim_Folder")]
     public virtual DZOI_Status Status { get; set; }

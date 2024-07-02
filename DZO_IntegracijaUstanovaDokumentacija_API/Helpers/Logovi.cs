@@ -12,14 +12,15 @@ namespace DZO_IntegracijaUstanovaDokumentacija_API.Helpers
         {
             _db = db;
         }
-        public  void LogError(int fileId, string error )
+        public  void LogError(int fileId, string error , int IdSpec)
         {   
             DZOI_Vizim_Json jSon = _db.DZOI_Vizim_Json.Where(j => j.Id == fileId).FirstOrDefault();
             jSon.StatusId = 3;
             _db.DZOI_Vizim_ErrorJson.Add(new DZOI_Vizim_ErrorJson
             {
                 IdJson = fileId,
-                NazivGreske = error
+                NazivGreske = error,
+                IdSpec = IdSpec
             });
             _db.SaveChanges();
         }

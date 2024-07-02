@@ -82,7 +82,7 @@ namespace DZO_IntegracijaUstanovaDokumentacija_API.Managers
                 try
                 {
                     var uspeh =  _sftpService.PrebaciFajlove(brUputa,NazivFajla);
-                    if (uspeh == false) { _logger.LogError(IdJson, "fajl ili folder ne postoji"); _logger.AzurirajStatusFajlova(idSpec, NazivFajla, 3);
+                    if (uspeh == false) { _logger.LogError(IdJson, "fajl ili folder ne postoji", idSpec); _logger.AzurirajStatusFajlova(idSpec, NazivFajla, 3);
                         _logger.AzurirajStatusspecifikacije(IdJson, 3);
                             break;
                     }
@@ -93,7 +93,7 @@ namespace DZO_IntegracijaUstanovaDokumentacija_API.Managers
                 catch (Exception ex)
                 {
 
-                    _logger.LogError(IdJson, "desila se greska prilikom prebacivanja fajla:" + ex);
+                    _logger.LogError(IdJson, "desila se greska prilikom prebacivanja fajla:" + ex,idSpec);
                     _logger.AzurirajStatusFajlova(idSpec, NazivFajla, 3);
                     _logger.AzurirajStatusspecifikacije(IdJson, 3);
                      continue;

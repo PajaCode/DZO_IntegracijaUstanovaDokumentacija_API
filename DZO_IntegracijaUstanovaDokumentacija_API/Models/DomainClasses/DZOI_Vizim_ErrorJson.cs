@@ -25,6 +25,8 @@ public partial class DZOI_Vizim_ErrorJson
     [StringLength(500)]
     public string Komentar { get; set; }
 
+    public int? IdSpec { get; set; }
+
     [ForeignKey("IdJson")]
     [InverseProperty("DZOI_Vizim_ErrorJson")]
     public virtual DZOI_Vizim_Json IdJsonNavigation { get; set; }
