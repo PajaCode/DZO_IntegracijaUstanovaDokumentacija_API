@@ -9,14 +9,16 @@ using Microsoft.EntityFrameworkCore;
 var builder = WebApplication.CreateBuilder(args);
 
 // Dodavanje konfiguracije iz appsettings.json
-builder.Configuration.AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
-builder.Configuration.AddJsonFile($"appsettings.{builder.Environment.EnvironmentName}.json", optional: true, reloadOnChange: true);
+IConfigurationRoot? config = new ConfigurationBuilder()
+                                .AddJsonFile("appsettings.json")
+                                .AddJsonFile($"appsettings.{builder.Environment.EnvironmentName}.json", optional: true)
+                                .Build();
+
 builder.Configuration.AddEnvironmentVariables();
 
-builder.Services.AddDbContext<VizimIntegracijaDb_Context>(options =>
-{
-    options.UseSqlServer(@"Data Source = TEST-SQL; Initial Catalog = VizimIntegracijaDb_Test; User ID = sqluser; Password = GlobosTest1; TrustServerCertificate=True;Encrypt=true");
-});
+string? defaultConnectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+builder.Services.AddDbContext<RazmenaDokumentacijeDb_Context>(options => options.UseSqlServer(defaultConnectionString));
+
 
 // Konfiguracija GlobosSftpSetting
 builder.Services.Configure<GlobosSftpSetting>(builder.Configuration.GetSection("GlobosSftpSettings"));
