@@ -10,15 +10,15 @@ using System.Threading.Tasks;
 
 namespace DZO_IntegracijaUstanovaDokumentacija_API.Models.DomainClasses
 {
-    public partial class VizimIntegracijaDb_Context
+    public partial class RazmenaDokumentacijeDb_Context
     {
-        private IVizimIntegracijaDb_ContextProcedures _procedures;
+        private IRazmenaDokumentacijeDb_ContextProcedures _procedures;
 
-        public virtual IVizimIntegracijaDb_ContextProcedures Procedures
+        public virtual IRazmenaDokumentacijeDb_ContextProcedures Procedures
         {
             get
             {
-                if (_procedures is null) _procedures = new VizimIntegracijaDb_ContextProcedures(this);
+                if (_procedures is null) _procedures = new RazmenaDokumentacijeDb_ContextProcedures(this);
                 return _procedures;
             }
             set
@@ -27,7 +27,7 @@ namespace DZO_IntegracijaUstanovaDokumentacija_API.Models.DomainClasses
             }
         }
 
-        public IVizimIntegracijaDb_ContextProcedures GetProcedures()
+        public IRazmenaDokumentacijeDb_ContextProcedures GetProcedures()
         {
             return Procedures;
         }
@@ -39,11 +39,11 @@ namespace DZO_IntegracijaUstanovaDokumentacija_API.Models.DomainClasses
         }
     }
 
-    public partial class VizimIntegracijaDb_ContextProcedures : IVizimIntegracijaDb_ContextProcedures
+    public partial class RazmenaDokumentacijeDb_ContextProcedures : IRazmenaDokumentacijeDb_ContextProcedures
     {
-        private readonly VizimIntegracijaDb_Context _context;
+        private readonly RazmenaDokumentacijeDb_Context _context;
 
-        public VizimIntegracijaDb_ContextProcedures(VizimIntegracijaDb_Context context)
+        public RazmenaDokumentacijeDb_ContextProcedures(RazmenaDokumentacijeDb_Context context)
         {
             _context = context;
         }

@@ -7,8 +7,8 @@ namespace DZO_IntegracijaUstanovaDokumentacija_API.Helpers
     public class Logovi
     {
        
-        private readonly VizimIntegracijaDb_Context _db;
-        public Logovi( VizimIntegracijaDb_Context db)
+        private readonly RazmenaDokumentacijeDb_Context _db;
+        public Logovi(RazmenaDokumentacijeDb_Context db)
         {
             _db = db;
         }

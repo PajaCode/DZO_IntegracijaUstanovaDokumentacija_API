@@ -15,9 +15,9 @@ namespace DZO_IntegracijaUstanovaDokumentacija_API.Controllers
     {
 
         private readonly GlobosSftpService _sftpService;
-        private readonly VizimIntegracijaDb_Context _db;
+        private readonly RazmenaDokumentacijeDb_Context _db;
         private readonly Logovi _logger;
-        public SpecifikacijaController(GlobosSftpService sftpService, VizimIntegracijaDb_Context db, Logovi logger)
+        public SpecifikacijaController(GlobosSftpService sftpService, RazmenaDokumentacijeDb_Context db, Logovi logger)
         {
             _sftpService = sftpService; 
             _db = db;

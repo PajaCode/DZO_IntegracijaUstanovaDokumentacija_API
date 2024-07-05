@@ -17,9 +17,9 @@ namespace DZO_IntegracijaUstanovaDokumentacija_API.Managers
     public class SpecifikacijaManager
     {
         private readonly GlobosSftpService _sftpService;
-        private readonly VizimIntegracijaDb_Context _db;
+        private readonly RazmenaDokumentacijeDb_Context _db;
         private readonly Logovi _logger;
-        public SpecifikacijaManager(GlobosSftpService sftpService, VizimIntegracijaDb_Context db, Logovi logger)
+        public SpecifikacijaManager(GlobosSftpService sftpService, RazmenaDokumentacijeDb_Context db, Logovi logger)
         {
             _sftpService = sftpService;
             _db = db;

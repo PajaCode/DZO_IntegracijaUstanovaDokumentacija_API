@@ -6,9 +6,9 @@ namespace DZO_IntegracijaUstanovaDokumentacija_API.Managers
     {
         private readonly GlobosSftpService _sftpService;
         private readonly CorisSftpService _sftpServiceCor;
-        private readonly VizimIntegracijaDb_Context _db;
+        private readonly RazmenaDokumentacijeDb_Context _db;
         private readonly Logovi _logger;
-        public PrebacivanjeFolderaCorisuManager(GlobosSftpService sftpService, CorisSftpService sftpServiceCor, VizimIntegracijaDb_Context db, Logovi logger)
+        public PrebacivanjeFolderaCorisuManager(GlobosSftpService sftpService, CorisSftpService sftpServiceCor, RazmenaDokumentacijeDb_Context db, Logovi logger)
         {
             _sftpService = sftpService;
             _sftpServiceCor = sftpServiceCor;

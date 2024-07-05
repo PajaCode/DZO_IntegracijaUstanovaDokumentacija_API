@@ -6,9 +6,9 @@ using Microsoft.EntityFrameworkCore;
 
 namespace DZO_IntegracijaUstanovaDokumentacija_API.Models.DomainClasses;
 
-public partial class VizimIntegracijaDb_Context : DbContext
+public partial class RazmenaDokumentacijeDb_Context : DbContext
 {
-    public VizimIntegracijaDb_Context(DbContextOptions<VizimIntegracijaDb_Context> options)
+    public RazmenaDokumentacijeDb_Context(DbContextOptions<RazmenaDokumentacijeDb_Context> options)
         : base(options)
     {
     }
