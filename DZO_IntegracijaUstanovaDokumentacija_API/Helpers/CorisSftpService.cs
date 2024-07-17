@@ -38,13 +38,14 @@ namespace DZO_IntegracijaUstanovaDokumentacija_API.Helpers
 
                 MoveFolder(homePath, homePathPOSLATO);
 
-                return new List<string> { "Uspeh", "" }; 
+                return new List<string> { "Uspeh", "" };
+
             }
             catch (Exception ex)
             {
                 MoveFolder(homePath, homePathGRESKA);
+                return new List<string> { "Neuspeh", "" };
 
-                return new List<string> { "Neuspeh", ex.ToString() }; 
             }
         }
 

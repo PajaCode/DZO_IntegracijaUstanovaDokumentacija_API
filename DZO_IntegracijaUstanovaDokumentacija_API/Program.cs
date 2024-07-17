@@ -17,15 +17,17 @@ IConfigurationRoot? config = new ConfigurationBuilder()
 builder.Configuration.AddEnvironmentVariables();
 
 string? defaultConnectionString = builder.Configuration.GetConnectionString("DefaultConnection");
-builder.Services.AddDbContext<VizimIntegracijaDb_Context>(options => options.UseSqlServer(defaultConnectionString));
+builder.Services.AddDbContext<RazmenaDokumentacijeDb_Context>(options => options.UseSqlServer(defaultConnectionString));
 
 // Konfiguracija GlobosSftpSetting
 builder.Services.Configure<GlobosSftpSetting>(builder.Configuration.GetSection("GlobosSftpSettings"));
 builder.Services.Configure<CorisSftpSetting>(builder.Configuration.GetSection("CorisSftpSettings"));
+builder.Services.Configure<MediGroupSftpSettings>(builder.Configuration.GetSection("MediGroupSftpSettings"));
 
 // Dodavanje GlobosSftpService kao singleton
 builder.Services.AddSingleton<GlobosSftpService>();
 builder.Services.AddSingleton<CorisSftpService>();
+builder.Services.AddSingleton<MediGroupSftpService>();
 
 
 builder.Services.AddScoped<Logovi>();
