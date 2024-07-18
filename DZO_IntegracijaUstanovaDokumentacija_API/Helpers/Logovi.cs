@@ -104,6 +104,31 @@ namespace DZO_IntegracijaUstanovaDokumentacija_API.Helpers
             _db.SaveChanges();
 
         }
+
+        public void AzurirajsStatusZipa(int idZip,int status)
+        {
+            var redoviZaAzuriranje=_db.DZOI_MediGroup_Zip.Where(mg=>mg.Id==idZip).ToList();
+
+            foreach(var red in redoviZaAzuriranje)
+            {
+                red.StatusId = status;
+                red.DatumPrebacivanja = DateTime.Now;
+            }
+            _db.SaveChanges();
+        }
+        public void LogErrorZip(int fileId, string error)
+        {
+
+            DZOI_MediGroup_Zip zip= _db.DZOI_MediGroup_Zip.Where(j => j.Id == fileId).FirstOrDefault();
+            zip.StatusId = 3;
+            _db.DZOI_MediGroup_ErrorZip.Add(new DZOI_MediGroup_ErrorZip
+            {
+                NazivGreske=error,
+                IdZip=fileId,
+                IdMetoda=6
+            });
+            _db.SaveChanges();
+        }
     }
 }
 

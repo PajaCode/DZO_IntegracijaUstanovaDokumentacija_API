@@ -44,22 +44,17 @@ namespace DZO_IntegracijaUstanovaDokumentacija_API.Helpers
             var homePathGRESKA = $"{remotePath}/GRESKA/";
             try
             {
-                _sftpService._sftpClient.Connect();
 
                 UploadDirectoryContents(remotePath, destinationPath);
 
                 MoveZipFile(remotePath, homePathPOSLATO);
 
-                _sftpService._sftpClient.Disconnect();
 
                 return new List<string> { "Uspeh", "" };
             }   
             catch (Exception ex)
             {
                 MoveZipFile(homePath, homePathGRESKA);
-
-                _sftpService._sftpClient.Disconnect();
-
 
                 return new List<string> { "Neuspeh", ex.ToString() };
             }
