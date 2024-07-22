@@ -49,12 +49,12 @@ namespace DZO_IntegracijaUstanovaDokumentacija_API.Managers
             foreach (var zip in zipFolderi)
             {
                 int idZip = Convert.ToInt32(zip.Id);
-                List<string> listZip = _sftpService.ListaZipFajlova();
+                //List<string> listZip = _sftpService.ListaZipFajlova();
                 _sftpService.Connect();
                 _sftpServiceCor.Connect();
-                foreach (string file in listZip)
-                {
-                    var uspeh = _sftpService.PrebaciZipSFTP(file);
+               // foreach (string file in listZip)
+                //{
+                    var uspeh = _sftpService.PrebaciZipSFTP(zip.nazivZip);
                     if (uspeh[0] == "Neuspeh")
                     {
                         _logger.LogErrorZip(idZip, "Zip fajl nije prebačen");
@@ -65,7 +65,7 @@ namespace DZO_IntegracijaUstanovaDokumentacija_API.Managers
                     {
                         _logger.AzurirajsStatusZipa(idZip, 2);
                     }
-                }
+                //}
                 _sftpService.Disconnect();
                 _sftpServiceCor.Disconnect();
             }

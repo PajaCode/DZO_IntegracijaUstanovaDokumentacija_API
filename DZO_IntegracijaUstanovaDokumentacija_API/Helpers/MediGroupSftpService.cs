@@ -62,17 +62,15 @@ namespace DZO_IntegracijaUstanovaDokumentacija_API.Helpers
 
         private void UploadDirectoryContents(string sourcePath, string destinationPath)
         {
-            var files = _sftpClient.ListDirectory(sourcePath);
+            var files = _sftpClient.ListDirectory(sourcePath)
+                          .Where(file => file.Name.EndsWith(".zip"));
             foreach (var file in files)
             {
-
-                    if (!file.IsDirectory && file.Name.EndsWith(".zip"))
-                    {
                         using (var fileStream = _sftpClient.OpenRead(file.FullName))
                         {
                             _sftpService._sftpClient.UploadFile(fileStream, destinationPath);
                         }
-                    }
+                    
                 
             }
 
@@ -80,13 +78,12 @@ namespace DZO_IntegracijaUstanovaDokumentacija_API.Helpers
 
         private void MoveZipFile(string sourcePath, string destinationPath)
         {
-            var files = _sftpClient.ListDirectory(sourcePath);
+            var files = _sftpClient.ListDirectory(sourcePath)
+                          .Where(file => file.Name.EndsWith(".zip"));
             foreach (var file in files)
             {
-                if (!file.IsDirectory && file.Name.EndsWith(".zip"))
-                {
                     file.MoveTo(destinationPath + file.Name);
-                }
+                
             }
         }
     }
