@@ -20,6 +20,14 @@
          "ObjectType": 0
       },
       {
+         "Name": "[dbo].[DZOI_MediGroup_ErrorZip]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[DZOI_MediGroup_Zip]",
+         "ObjectType": 0
+      },
+      {
          "Name": "[dbo].[DZOI_Status]",
          "ObjectType": 0
       },

@@ -17,6 +17,9 @@ public partial class DZOI_Status
     public string Naziv { get; set; }
 
     [InverseProperty("Status")]
+    public virtual ICollection<DZOI_MediGroup_Zip> DZOI_MediGroup_Zip { get; set; } = new List<DZOI_MediGroup_Zip>();
+
+    [InverseProperty("Status")]
     public virtual ICollection<DZOI_Vizim_Fajlovi> DZOI_Vizim_Fajlovi { get; set; } = new List<DZOI_Vizim_Fajlovi>();
 
     [InverseProperty("Status")]

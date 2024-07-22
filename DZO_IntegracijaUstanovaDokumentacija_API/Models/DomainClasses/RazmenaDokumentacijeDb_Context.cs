@@ -15,6 +15,10 @@ public partial class RazmenaDokumentacijeDb_Context : DbContext
 
     public virtual DbSet<DZOI_LogProcedureError> DZOI_LogProcedureError { get; set; }
 
+    public virtual DbSet<DZOI_MediGroup_ErrorZip> DZOI_MediGroup_ErrorZip { get; set; }
+
+    public virtual DbSet<DZOI_MediGroup_Zip> DZOI_MediGroup_Zip { get; set; }
+
     public virtual DbSet<DZOI_Status> DZOI_Status { get; set; }
 
     public virtual DbSet<DZOI_Vizim_ErrorJson> DZOI_Vizim_ErrorJson { get; set; }
@@ -36,6 +40,16 @@ public partial class RazmenaDokumentacijeDb_Context : DbContext
         modelBuilder.Entity<DZOI_LogProcedureError>(entity =>
         {
             entity.HasKey(e => e.Id).HasName("PK__DZOI_Log__3214EC079FE68EE9");
+        });
+
+        modelBuilder.Entity<DZOI_MediGroup_ErrorZip>(entity =>
+        {
+            entity.Property(e => e.SistemskiDatum).HasDefaultValueSql("(getdate())");
+        });
+
+        modelBuilder.Entity<DZOI_MediGroup_Zip>(entity =>
+        {
+            entity.HasOne(d => d.Status).WithMany(p => p.DZOI_MediGroup_Zip).HasConstraintName("FK_DZOI_MediGroup_Zip_DZOI_Status");
         });
 
         modelBuilder.Entity<DZOI_Status>(entity =>
