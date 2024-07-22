@@ -39,31 +39,31 @@ namespace DZO_IntegracijaUstanovaDokumentacija_API.Helpers
         {
             var remotePath = _remotePath;
             var homePath = $"{remotePath}/{naziv}";
-            var destinationPath = $"{_sftpService._remotePath}/{naziv}";
+            var destinationPath = $"{"GlobosDokumentacijaMedigroup"}/{naziv}";
             var homePathPOSLATO = $"{remotePath}/POSLATO/";
             var homePathGRESKA = $"{remotePath}/GRESKA/";
             try
             {
 
-                UploadDirectoryContents(remotePath, destinationPath);
+                UploadDirectoryContents(remotePath, destinationPath, naziv);
 
-                MoveZipFile(remotePath, homePathPOSLATO);
+                MoveZipFile(remotePath, homePathPOSLATO, naziv);
 
 
                 return new List<string> { "Uspeh", "" };
             }   
             catch (Exception ex)
             {
-                MoveZipFile(homePath, homePathGRESKA);
+                MoveZipFile(homePath, homePathGRESKA, naziv );
 
                 return new List<string> { "Neuspeh", ex.ToString() };
             }
         }
 
-        private void UploadDirectoryContents(string sourcePath, string destinationPath)
+        private void UploadDirectoryContents(string sourcePath, string destinationPath, string naziv)
         {
             var files = _sftpClient.ListDirectory(sourcePath)
-                          .Where(file => file.Name.EndsWith(".zip"));
+                          .Where(file => file.Name == naziv);
             foreach (var file in files)
             {
                         using (var fileStream = _sftpClient.OpenRead(file.FullName))
@@ -76,10 +76,10 @@ namespace DZO_IntegracijaUstanovaDokumentacija_API.Helpers
 
         }
 
-        private void MoveZipFile(string sourcePath, string destinationPath)
+        private void MoveZipFile(string sourcePath, string destinationPath, string naziv)
         {
             var files = _sftpClient.ListDirectory(sourcePath)
-                          .Where(file => file.Name.EndsWith(".zip"));
+                          .Where(file => file.Name == naziv);
             foreach (var file in files)
             {
                     file.MoveTo(destinationPath + file.Name);
