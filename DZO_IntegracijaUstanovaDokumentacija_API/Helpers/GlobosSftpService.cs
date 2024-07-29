@@ -8,6 +8,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
+using static System.Net.WebRequestMethods;
 
 namespace DZO_IntegracijaUstanovaDokumentacija_API.Helpers
 {
@@ -44,30 +45,8 @@ namespace DZO_IntegracijaUstanovaDokumentacija_API.Helpers
 
         public string UzmiSadrzajFajla(string file)
         {
-            
+
             Connect();
-
-            //StringBuilder sb = new StringBuilder();
-            //string baseRemotePath = VratiPutanju();
-            //string additionalPath = "/TEST"; // Additional directory you mentioned.
-
-            //sb.Append(baseRemotePath);
-            //sb.Append(additionalPath);
-            //sb.Append('/');
-
-
-
-            //var remotePath = _remotePath;
-            //var filePath = remotePath + "/TEST/";
-
-
-
-            //var homePathPOSLATO = $"{remotePath}/TEST/";
-            //string myFileName = @"home/vizim/TEST/";
-
-            //_sftpClient.ChangeDirectory(homePathPOSLATO);
-
-            
             using (var stream = _sftpClient.OpenRead(file))
             {
                 using (var reader = new StreamReader(stream))
