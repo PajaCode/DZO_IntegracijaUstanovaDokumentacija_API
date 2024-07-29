@@ -4,7 +4,7 @@
    "ContextNamespace": null,
    "DefaultDacpacSchema": null,
    "FilterSchemas": false,
-   "IncludeConnectionString": true,
+   "IncludeConnectionString": false,
    "ModelNamespace": null,
    "OutputContextPath": null,
    "OutputPath": "Models\/DomainClasses",
@@ -68,7 +68,7 @@
          "ObjectType": 1
       }
    ],
-   "UiHint": "test-sql.VizimIntegracijaDb_Test.dbo",
+   "UiHint": "globos-sql.RazmenaDokumentacijeDb.dbo",
    "UncountableWords": null,
    "UseBoolPropertiesWithoutDefaultSql": false,
    "UseDatabaseNames": true,
