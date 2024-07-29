@@ -8,6 +8,10 @@ namespace DZO_IntegracijaUstanovaDokumentacija_API.Models.DomainClasses;
 
 public partial class RazmenaDokumentacijeDb_Context : DbContext
 {
+    public RazmenaDokumentacijeDb_Context()
+    {
+    }
+
     public RazmenaDokumentacijeDb_Context(DbContextOptions<RazmenaDokumentacijeDb_Context> options)
         : base(options)
     {
@@ -34,6 +38,10 @@ public partial class RazmenaDokumentacijeDb_Context : DbContext
     public virtual DbSet<DZOI_Vizim_Specifikacija> DZOI_Vizim_Specifikacija { get; set; }
 
     public virtual DbSet<DZOI_Vizim_StavkeRacuna> DZOI_Vizim_StavkeRacuna { get; set; }
+
+    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
+        => optionsBuilder.UseSqlServer("Data Source=test-sql;Initial Catalog=VizimIntegracijaDb_Test;Integrated Security=True; TrustServerCertificate=True;");
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

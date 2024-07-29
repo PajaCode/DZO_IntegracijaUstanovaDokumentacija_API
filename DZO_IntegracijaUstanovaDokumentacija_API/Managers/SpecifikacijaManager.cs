@@ -9,6 +9,7 @@ using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using System.Globalization;
 using System.Net.Http.Json;
+using System.Text;
 using System.Text.Json.Nodes;
 
 namespace DZO_IntegracijaUstanovaDokumentacija_API.Managers
@@ -28,14 +29,22 @@ namespace DZO_IntegracijaUstanovaDokumentacija_API.Managers
 
         public void UpisiJsone()
         {
+
+            StringBuilder sb=new();
             List<string> listaFajlova = new();
             listaFajlova = _sftpService.ListaJsona();
 
 
             foreach (var file in listaFajlova)
             {
-                var existingEntry = _db.DZOI_Vizim_Json.FirstOrDefault(x => x.nazivJson == file);
-                if (existingEntry is null)
+                string zaPretragu = file.Substring(0,file.IndexOf('.'));
+                var numberOfExistingFiles = _db.DZOI_Vizim_Json.Count(x => x.nazivJson.Contains(zaPretragu));
+                //provera koliko vec ima fajlova sa tim nazivom
+
+                //upisati ga onda u bazu
+
+
+                if (numberOfExistingFiles == 0)
                 {
                     DZOI_Vizim_Json newEntry = new DZOI_Vizim_Json
                     {
@@ -47,10 +56,39 @@ namespace DZO_IntegracijaUstanovaDokumentacija_API.Managers
                     _db.SaveChanges();
 
                 }
+                else if(numberOfExistingFiles > 0)
+                {
+                    sb.Clear();
+                    sb.Append(file);
+                    sb.Replace(".JSON", "");
+                    sb.Append("_" + numberOfExistingFiles.ToString());
+                    sb.Append(".JSON");
+
+                    string putanjaKaFajlu = _sftpService.VratiPutanju();
+
+                    var oldFilePath = $"{putanjaKaFajlu}/{file}";
+                    var newFilePath = $"{putanjaKaFajlu}/{sb.ToString()}";
+
+                    _sftpService._sftpClient.Connect();
+
+                    _sftpService._sftpClient.RenameFile(oldFilePath, newFilePath);
+
+                    DZOI_Vizim_Json newEntry = new DZOI_Vizim_Json
+                    {
+                        nazivJson = sb.ToString(),
+                        StatusId = 1,
+                        SistemskiDatum = DateTime.Now
+                    };
+                    _db.DZOI_Vizim_Json.Add(newEntry);
+                    _db.SaveChanges();
+
+                }
                 else
                 {
                     continue;
                 }
+                _sftpService._sftpClient.Disconnect();
+
             }
         }
 
