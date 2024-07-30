@@ -68,11 +68,11 @@ namespace DZO_IntegracijaUstanovaDokumentacija_API.Helpers
 
             Connect();
 
-            string putanjaDoFoldera = _remotePath+" / "+nazivFoldera;
+           // string putanjaDoFoldera = _remotePath+" / "+nazivFoldera;
 
-            if (!_sftpClient.Exists(putanjaDoFoldera))
+            if (!_sftpClient.Exists(nazivFoldera))
             {
-                _sftpClient.CreateDirectory(putanjaDoFoldera);
+                _sftpClient.CreateDirectory(nazivFoldera);
 
 
                 return "Uspeh";
