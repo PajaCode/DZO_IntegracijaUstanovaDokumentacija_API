@@ -39,7 +39,7 @@ public partial class RazmenaDokumentacijeDb_Context : DbContext
     {
         modelBuilder.Entity<DZOI_LogProcedureError>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__DZOI_Log__3214EC079FE68EE9");
+            entity.HasKey(e => e.Id).HasName("PK__DZOI_Log__3214EC07CF91B0EA");
         });
 
         modelBuilder.Entity<DZOI_MediGroup_ErrorZip>(entity =>
@@ -54,7 +54,7 @@ public partial class RazmenaDokumentacijeDb_Context : DbContext
 
         modelBuilder.Entity<DZOI_Status>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__DZOI_Sta__3214EC07A3CBC4F5");
+            entity.HasKey(e => e.Id).HasName("PK__DZOI_Sta__3214EC0704D22D14");
         });
 
         modelBuilder.Entity<DZOI_Vizim_ErrorJson>(entity =>
@@ -66,11 +66,11 @@ public partial class RazmenaDokumentacijeDb_Context : DbContext
 
         modelBuilder.Entity<DZOI_Vizim_Fajlovi>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__DZOI_Viz__3214EC07CB99584A");
+            entity.HasKey(e => e.Id).HasName("PK__DZOI_Viz__3214EC07D131233A");
 
-            entity.HasOne(d => d.IdSpecifikacijeNavigation).WithMany(p => p.DZOI_Vizim_Fajlovi).HasConstraintName("FK__DZOI_Vizi__IdSpe__2F10007B");
+            entity.HasOne(d => d.IdSpecifikacijeNavigation).WithMany(p => p.DZOI_Vizim_Fajlovi).HasConstraintName("FK__DZOI_Vizi__IdSpe__3C69FB99");
 
-            entity.HasOne(d => d.Status).WithMany(p => p.DZOI_Vizim_Fajlovi).HasConstraintName("FK__DZOI_Vizi__Statu__300424B4");
+            entity.HasOne(d => d.Status).WithMany(p => p.DZOI_Vizim_Fajlovi).HasConstraintName("FK__DZOI_Vizi__Statu__3D5E1FD2");
         });
 
         modelBuilder.Entity<DZOI_Vizim_Folder>(entity =>
@@ -87,25 +87,25 @@ public partial class RazmenaDokumentacijeDb_Context : DbContext
 
         modelBuilder.Entity<DZOI_Vizim_Racun>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__DZOI_Viz__3214EC079B2DB579");
+            entity.HasKey(e => e.Id).HasName("PK__DZOI_Viz__3214EC07F4AE1BB2");
 
-            entity.HasOne(d => d.IdSpecifikacijeNavigation).WithMany(p => p.DZOI_Vizim_Racun).HasConstraintName("FK__DZOI_Vizi__IdSpe__4AB81AF0");
+            entity.HasOne(d => d.IdSpecifikacijeNavigation).WithMany(p => p.DZOI_Vizim_Racun).HasConstraintName("FK__DZOI_Vizi__IdSpe__403A8C7D");
         });
 
         modelBuilder.Entity<DZOI_Vizim_Specifikacija>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__DZOI_Viz__3214EC070A8FF919");
+            entity.HasKey(e => e.Id).HasName("PK__DZOI_Viz__3214EC07F1300A31");
 
             entity.HasOne(d => d.IdJsonNavigation).WithMany(p => p.DZOI_Vizim_Specifikacija).HasConstraintName("FK_DZOI_Vizim_Specifikacija_DZOI_Vizim_Json");
 
-            entity.HasOne(d => d.Status).WithMany(p => p.DZOI_Vizim_Specifikacija).HasConstraintName("FK__DZOI_Vizi__Statu__267ABA7A");
+            entity.HasOne(d => d.Status).WithMany(p => p.DZOI_Vizim_Specifikacija).HasConstraintName("FK__DZOI_Vizi__Statu__412EB0B6");
         });
 
         modelBuilder.Entity<DZOI_Vizim_StavkeRacuna>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__DZOI_Viz__3214EC072EE859E7");
+            entity.HasKey(e => e.Id).HasName("PK__DZOI_Viz__3214EC07539E8DC1");
 
-            entity.HasOne(d => d.IdRacunaNavigation).WithMany(p => p.DZOI_Vizim_StavkeRacuna).HasConstraintName("FK__DZOI_Vizi__IdRac__6A30C649");
+            entity.HasOne(d => d.IdRacunaNavigation).WithMany(p => p.DZOI_Vizim_StavkeRacuna).HasConstraintName("FK__DZOI_Vizi__IdRac__4316F928");
         });
 
         OnModelCreatingGeneratedProcedures(modelBuilder);

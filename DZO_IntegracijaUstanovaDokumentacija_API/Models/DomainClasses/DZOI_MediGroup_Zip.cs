@@ -13,7 +13,7 @@ public partial class DZOI_MediGroup_Zip
     [Key]
     public int Id { get; set; }
 
-    [StringLength(50)]
+    [StringLength(500)]
     public string nazivZip { get; set; }
 
     public int? StatusId { get; set; }

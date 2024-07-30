@@ -7,6 +7,8 @@ using Renci.SshNet.Sftp;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using System.Text;
+using static System.Net.WebRequestMethods;
 
 namespace DZO_IntegracijaUstanovaDokumentacija_API.Helpers
 {
@@ -43,17 +45,21 @@ namespace DZO_IntegracijaUstanovaDokumentacija_API.Helpers
 
         public string UzmiSadrzajFajla(string file)
         {
+
             Connect();
             using (var stream = _sftpClient.OpenRead(file))
             {
                 using (var reader = new StreamReader(stream))
                 {
                     return reader.ReadToEnd();
-                    
+
                 }
-                
+
             }
-           
+
+
+
+
 
         }
 
@@ -62,11 +68,11 @@ namespace DZO_IntegracijaUstanovaDokumentacija_API.Helpers
 
             Connect();
 
-            string putanjaDoFoldera = _remotePath+"/"+nazivFoldera;
+           // string putanjaDoFoldera = _remotePath+" / "+nazivFoldera;
 
-            if (!_sftpClient.Exists(putanjaDoFoldera))
+            if (!_sftpClient.Exists(nazivFoldera))
             {
-                _sftpClient.CreateDirectory(putanjaDoFoldera);
+                _sftpClient.CreateDirectory(nazivFoldera);
 
 
                 return "Uspeh";

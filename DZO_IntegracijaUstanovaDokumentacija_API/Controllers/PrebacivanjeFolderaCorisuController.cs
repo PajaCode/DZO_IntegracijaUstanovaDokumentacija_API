@@ -6,13 +6,13 @@ namespace DZO_IntegracijaUstanovaDokumentacija_API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class PrebacivanjeFolderaCorisu : ControllerBase
+    public class PrebacivanjeFolderaCorisuController : ControllerBase
     {
         private readonly GlobosSftpService _sftpService;
         private readonly CorisSftpService _sftpServiceCor;
         private readonly RazmenaDokumentacijeDb_Context _db;
         private readonly Logovi _logger;
-        public PrebacivanjeFolderaCorisu(GlobosSftpService sftpService, CorisSftpService sftpServiceCor, RazmenaDokumentacijeDb_Context db, Logovi logger)
+        public PrebacivanjeFolderaCorisuController(GlobosSftpService sftpService, CorisSftpService sftpServiceCor, RazmenaDokumentacijeDb_Context db, Logovi logger)
         {
             _sftpService = sftpService;
             _sftpServiceCor = sftpServiceCor;
