@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
+using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json;
 using System.Globalization;
 using System.Net.Http.Json;
@@ -30,15 +31,15 @@ namespace DZO_IntegracijaUstanovaDokumentacija_API.Managers
         public void UpisiJsone()
         {
 
-            StringBuilder sb=new();
+            StringBuilder sb = new();
             List<string> listaFajlova = new();
             listaFajlova = _sftpService.ListaJsona();
 
 
             foreach (var file in listaFajlova)
             {
-                string zaPretragu = file.Substring(0,file.IndexOf('.'));
-                var numberOfExistingFiles = _db.DZOI_Vizim_Json.Count(x => x.nazivJson.Contains(zaPretragu));
+                string zaPretragu = file.Substring(0, file.IndexOf('.'));
+                var numberOfExistingFiles = _db.DZOI_Vizim_Json.Count(x => x.nazivJson.Contains(zaPretragu) && x.StatusId == 2);
                 //provera koliko vec ima fajlova sa tim nazivom
 
                 //upisati ga onda u bazu
@@ -56,7 +57,7 @@ namespace DZO_IntegracijaUstanovaDokumentacija_API.Managers
                     _db.SaveChanges();
 
                 }
-                else if(numberOfExistingFiles > 0)
+                else if (numberOfExistingFiles > 0)
                 {
                     sb.Clear();
                     sb.Append(file);
@@ -111,37 +112,37 @@ namespace DZO_IntegracijaUstanovaDokumentacija_API.Managers
 
                     string sadrzajFajla = _sftpService.UzmiSadrzajFajla(nazivString);
                     _sftpService.Disconnect();
-                  
+
                     try
                     {
-                        
-                        var jsonObject = JsonConvert.DeserializeObject<FileJson>(sadrzajFajla,settings);
 
-                        if(jsonObject is null)
+                        var jsonObject = JsonConvert.DeserializeObject<FileJson>(sadrzajFajla, settings);
+
+                        if (jsonObject is null)
                         {
-                             _logger.LogError(rezultatItem.Id, "Izabrani JSON je prazan.", 0,2);
+                            _logger.LogError(rezultatItem.Id, "Izabrani JSON je prazan.", 0, 2);
                             continue;
                         }
                         else
                         {
                             try
                             {
-                                _ = InsertPodatakaIzJsona(jsonObject, rezultatItem.Id).Result;
+                                _ = InsertPodatakaIzJsona(jsonObject, rezultatItem).Result;
                                 _logger.AzurirajStatusVizimJson(rezultatItem.Id, 2);
                             }
                             catch (Exception ex)
                             {
 
-                                _logger.LogError(rezultatItem.Id, ex.Message + "metoda parsirajIinsertuj - insert",0,2);
+                                _logger.LogError(rezultatItem.Id, ex.Message + "metoda parsirajIinsertuj - insert", 0, 2);
                                 continue;
                             }
                         }
-                        
+
                     }
                     catch (Exception ex)
                     {
 
-                        _logger.LogError(rezultatItem.Id, ex.Message + "metoda parsirajIinsertuj - parsiranje JSON-a",0,2);
+                        _logger.LogError(rezultatItem.Id, ex.Message + "metoda parsirajIinsertuj - parsiranje JSON-a", 0, 2);
                         continue;
                     }
 
@@ -154,18 +155,19 @@ namespace DZO_IntegracijaUstanovaDokumentacija_API.Managers
             }
         }
 
-        public async Task<List<DZOI_InsertSpecifikacijeRacunaFajlovaResult>> InsertPodatakaIzJsona(FileJson fileJson, int idJson)
+        public async Task<List<DZOI_InsertSpecifikacijeRacunaFajlovaResult>> InsertPodatakaIzJsona(FileJson fileJson, DZOI_Vizim_Json json)
         {
 
             DataTable specifikacija = new();
             DataTable racun = new();
             DataTable stavka = new();
             DataTable fajl = new();
-
+            List<string> listaFajlova = new();
             string opisJson = JsonConvert.SerializeObject(fileJson);
+
             ZaglavljeTable zaglavljeTable = new ZaglavljeTable
             {
-                IdJson = idJson,
+                IdJson = json.Id,
                 FakturaId = fileJson.Zaglavlje.FakturaId,
                 FakturaBroj = fileJson.Zaglavlje.FakturaBroj,
                 UstanovaIDMG = fileJson.Zaglavlje.UstanovaIDMG,
@@ -179,6 +181,15 @@ namespace DZO_IntegracijaUstanovaDokumentacija_API.Managers
             List<FajloviTable> fajlovi = [];
             foreach (Racun rac in fileJson.Racun)
             {
+                if (!String.IsNullOrEmpty(rac.RacunFajl))
+                {
+                    listaFajlova.Add(rac.RacunFajl);
+                }
+                if (!String.IsNullOrEmpty(rac.UputFajl))
+                {
+                    listaFajlova.Add(rac.UputFajl);
+                }
+
                 RacunTable racunTable = new RacunTable
                 {
                     RacunID = rac.RacunID,
@@ -196,6 +207,21 @@ namespace DZO_IntegracijaUstanovaDokumentacija_API.Managers
 
                 foreach (Stavka stav in rac.Stavka)
                 {
+
+                    if (!String.IsNullOrEmpty(stav.LabNalazFajl))
+                    {
+                        listaFajlova.Add(stav.LabNalazFajl);
+                    }
+                    if (!String.IsNullOrEmpty(stav.NalazFajl))
+                    {
+                        listaFajlova.Add(stav.NalazFajl);
+                    }
+                    if (!String.IsNullOrEmpty(stav.Nalazsistematski))
+                    {
+                        listaFajlova.Add(stav.Nalazsistematski);
+                    }
+
+
                     StavkaTable stavkaTable = new StavkaTable
                     {
                         StavkaID = stav.StavkaID,
@@ -219,6 +245,7 @@ namespace DZO_IntegracijaUstanovaDokumentacija_API.Managers
                         string[] attachments = stav.Attachments.Split(";");
                         foreach (string attachment in attachments)
                         {
+                            listaFajlova.Add(attachment);
                             FajloviTable fajloviTable = new FajloviTable
                             {
                                 NazivFajla = attachment
@@ -229,6 +256,13 @@ namespace DZO_IntegracijaUstanovaDokumentacija_API.Managers
                 }
 
             }
+
+
+            _sftpService.PostojiFajl(listaFajlova, json.nazivJson);
+
+
+
+
             racun = FormatTypeHelper.ToDataTableFromList(racuni);
             stavka = FormatTypeHelper.ToDataTableFromList(stavke);
             fajl = FormatTypeHelper.ToDataTableFromList(fajlovi);

@@ -14,11 +14,11 @@ namespace DZO_IntegracijaUstanovaDokumentacija_API.Helpers
 {
     public class GlobosSftpService : BaseSftpService
     {
-        
+
         public GlobosSftpService(IOptions<GlobosSftpSetting> sftpSettings)
-         : base(sftpSettings.Value.Host, sftpSettings.Value.Port ,sftpSettings.Value.Username, sftpSettings.Value.Password, sftpSettings.Value.RemotePath)
+         : base(sftpSettings.Value.Host, sftpSettings.Value.Port, sftpSettings.Value.Username, sftpSettings.Value.Password, sftpSettings.Value.RemotePath)
         {
-            
+
         }
 
 
@@ -68,7 +68,7 @@ namespace DZO_IntegracijaUstanovaDokumentacija_API.Helpers
 
             Connect();
 
-           // string putanjaDoFoldera = _remotePath+" / "+nazivFoldera;
+            // string putanjaDoFoldera = _remotePath+" / "+nazivFoldera;
 
             if (!_sftpClient.Exists(nazivFoldera))
             {
@@ -101,7 +101,7 @@ namespace DZO_IntegracijaUstanovaDokumentacija_API.Helpers
                 if (pdfExists)
                 {
                     _sftpClient.RenameFile(putanjaDoFajla, putanjaDoFoldera + "/" + NazivFajla);
-                    return true ;
+                    return true;
                 }
                 else
                 {
@@ -113,7 +113,7 @@ namespace DZO_IntegracijaUstanovaDokumentacija_API.Helpers
                 return false;
             }
 
-         
+
 
 
 
@@ -121,7 +121,7 @@ namespace DZO_IntegracijaUstanovaDokumentacija_API.Helpers
 
         public List<string> ListaFoldera()
         {
-            
+
             Connect();
 
             var folderi = _sftpClient.ListDirectory(_remotePath)
@@ -141,7 +141,25 @@ namespace DZO_IntegracijaUstanovaDokumentacija_API.Helpers
         {
             return _remotePath;
         }
-     
+
+
+        public void PostojiFajl(List<string> files, string jsonFile)
+        {
+            Connect();
+
+            foreach (string file in files)
+            {
+                string filePath = $"{_remotePath}/{jsonFile}";
+                string errorPath = $"{_remotePath}/GRESKA/{jsonFile}";
+                if (!_sftpClient.Exists($"{_remotePath}/{file}"))
+                {
+                    _sftpClient.RenameFile(filePath, errorPath);
+                    throw new Exception($"{file} ne postoji na SFTP serveru");
+                }
+
+            }
+            Disconnect();
+        }
 
     }
 
