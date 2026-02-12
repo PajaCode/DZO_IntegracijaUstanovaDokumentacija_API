@@ -6,16 +6,14 @@ namespace DZO_IntegracijaUstanovaDokumentacija_API.Helpers
 {
     public class Logovi
     {
-       
         private readonly RazmenaDokumentacijeDb_Context _db;
-        public Logovi(RazmenaDokumentacijeDb_Context db)
+        public Logovi(RazmenaDokumentacijeDb_Context db) { _db = db; }
+
+        public void LogError(int fileId, string error, int IdSpec, int IdMetoda)
         {
-            _db = db;
-        }
-        public  void LogError(int fileId, string error , int IdSpec , int IdMetoda)
-        {   
-            DZOI_Vizim_Json jSon = _db.DZOI_Vizim_Json.Where(j => j.Id == fileId).FirstOrDefault();
-            jSon.StatusId = 3;
+            var jSon = _db.DZOI_Vizim_Json.FirstOrDefault(j => j.Id == fileId);
+            if (jSon != null) jSon.StatusId = 3;
+
             _db.DZOI_Vizim_ErrorJson.Add(new DZOI_Vizim_ErrorJson
             {
                 IdJson = fileId,
@@ -28,57 +26,37 @@ namespace DZO_IntegracijaUstanovaDokumentacija_API.Helpers
 
         public void AzurirajStatusVizimJson(int IdJson, int status)
         {
-            var redoviZaAzuriranje = _db.DZOI_Vizim_Json.Where(d => d.Id == IdJson).ToList();
-
-            foreach (var red in redoviZaAzuriranje)
-            {
-                red.StatusId = status;
-                
-            }
-
+            _db.DZOI_Vizim_Json.Where(d => d.Id == IdJson).ToList()
+                .ForEach(red => red.StatusId = status);
             _db.SaveChanges();
-
         }
 
         public void AzurirajStatusFajlova(int IdSpec, string NazivFajla, int status)
         {
-            var redoviZaAzuriranje = _db.DZOI_Vizim_Fajlovi.Where(d => d.IdSpecifikacije == IdSpec && d.NazivFajla == NazivFajla).ToList();
-
-            foreach (var red in redoviZaAzuriranje)
-            {
-                red.StatusId =status;
-                red.DatumPrebacivanja = DateTime.Now;
-            }
-
+            _db.DZOI_Vizim_Fajlovi.Where(d => d.IdSpecifikacije == IdSpec && d.NazivFajla == NazivFajla).ToList()
+                .ForEach(red =>
+                {
+                    red.StatusId = status;
+                    red.DatumPrebacivanja = DateTime.Now;
+                });
             _db.SaveChanges();
-
         }
 
         public void AzurirajStatusFoldera(int IdJson, string NazivFoldera, int status)
         {
-            var redoviZaAzuriranje = _db.DZOI_Vizim_Folder.Where(d => d.IdJson == IdJson && d.nazivFoldera == NazivFoldera).ToList();
-
-            foreach (var red in redoviZaAzuriranje)
-            {
-                red.StatusId = status;
-                red.DatumPrebacivanja = DateTime.Now;
-            }
-
+            _db.DZOI_Vizim_Folder.Where(d => d.IdJson == IdJson && d.nazivFoldera == NazivFoldera).ToList()
+                .ForEach(red =>
+                {
+                    red.StatusId = status;
+                    red.DatumPrebacivanja = DateTime.Now;
+                });
             _db.SaveChanges();
-
         }
 
-
-        public void AzurirajStatusspecifikacije(int IdJson, string error , int IdMetoda)
+        public void AzurirajStatusspecifikacije(int IdJson, string error, int IdMetoda)
         {
-            var redoviZaAzuriranje = _db.DZOI_Vizim_Specifikacija.Where(d => d.IdJson == IdJson ).ToList();
-
-            foreach (var red in redoviZaAzuriranje)
-            {
-                red.StatusId = 3;
-                
-            }
-
+            var redovi = _db.DZOI_Vizim_Specifikacija.Where(d => d.IdJson == IdJson).ToList();
+            foreach (var red in redovi) red.StatusId = 3;
 
             _db.DZOI_Vizim_ErrorJson.Add(new DZOI_Vizim_ErrorJson
             {
@@ -87,48 +65,38 @@ namespace DZO_IntegracijaUstanovaDokumentacija_API.Helpers
                 IdMetoda = IdMetoda
             });
             _db.SaveChanges();
-
-            
-
         }
 
         public void AzurirajStatusspecifikacije(int IdJson, int status)
         {
-            var redoviZaAzuriranje = _db.DZOI_Vizim_Specifikacija.Where(d => d.IdJson == IdJson).ToList();
-
-            foreach (var red in redoviZaAzuriranje)
-            {
-                red.StatusId = status;
-
-            }
+            _db.DZOI_Vizim_Specifikacija.Where(d => d.IdJson == IdJson).ToList()
+                .ForEach(red => red.StatusId = status);
             _db.SaveChanges();
-
         }
 
-        public void AzurirajsStatusZipa(int idZip,int status)
+        public void AzurirajsStatusZipa(int idZip, int status)
         {
-            var redoviZaAzuriranje=_db.DZOI_MediGroup_Zip.Where(mg=>mg.Id==idZip).ToList();
-
-            foreach(var red in redoviZaAzuriranje)
+            var redovi = _db.DZOI_MediGroup_Zip.Where(mg => mg.Id == idZip).ToList();
+            foreach (var red in redovi)
             {
                 red.StatusId = status;
                 red.DatumPrebacivanja = DateTime.Now;
             }
             _db.SaveChanges();
         }
+
         public void LogErrorZip(int fileId, string error)
         {
+            var zip = _db.DZOI_MediGroup_Zip.FirstOrDefault(j => j.Id == fileId);
+            if (zip != null) zip.StatusId = 3;
 
-            DZOI_MediGroup_Zip zip= _db.DZOI_MediGroup_Zip.Where(j => j.Id == fileId).FirstOrDefault();
-            zip.StatusId = 3;
             _db.DZOI_MediGroup_ErrorZip.Add(new DZOI_MediGroup_ErrorZip
             {
-                NazivGreske=error,
-                IdZip=fileId,
-                IdMetoda=6
+                NazivGreske = error,
+                IdZip = fileId,
+                IdMetoda = 6
             });
             _db.SaveChanges();
         }
     }
 }
-

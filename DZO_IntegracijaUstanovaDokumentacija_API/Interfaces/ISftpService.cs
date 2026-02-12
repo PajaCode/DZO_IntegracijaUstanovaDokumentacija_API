@@ -1,10 +1,11 @@
 ﻿namespace DZO_IntegracijaUstanovaDokumentacija_API.Interfaces
 {
-    
-        public interface ISftpService
-        {
-            void Connect();
-            void Disconnect();
-        }
-    
+
+    public interface ISftpService : System.IDisposable
+    {
+        void Connect();
+        void Disconnect();
+        bool IsConnected { get; }
+    }
+
 }

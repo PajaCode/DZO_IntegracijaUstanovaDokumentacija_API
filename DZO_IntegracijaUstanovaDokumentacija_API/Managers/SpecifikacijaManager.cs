@@ -30,66 +30,43 @@ namespace DZO_IntegracijaUstanovaDokumentacija_API.Managers
 
         public void UpisiJsone()
         {
+            var sb = new StringBuilder();
+            var listaFajlova = _sftpService.ListaJsona();
 
-            StringBuilder sb = new();
-            List<string> listaFajlova = new();
-            listaFajlova = _sftpService.ListaJsona();
-
-
-            foreach (var file in listaFajlova)
+            using (_sftpService.ConnectScope())
             {
-                string zaPretragu = file.Substring(0, file.IndexOf('.'));
-                var numberOfExistingFiles = _db.DZOI_Vizim_Json.Count(x => x.nazivJson.Contains(zaPretragu) && x.StatusId == 2);
-                //provera koliko vec ima fajlova sa tim nazivom
-
-                //upisati ga onda u bazu
-
-
-                if (numberOfExistingFiles == 0)
+                listaFajlova.ForEach(file =>
                 {
-                    DZOI_Vizim_Json newEntry = new DZOI_Vizim_Json
+                    var zaPretragu = file.Substring(0, file.IndexOf('.'));
+                    var existsCount = _db.DZOI_Vizim_Json.Count(x => x.nazivJson.Contains(zaPretragu) && x.StatusId == 2);
+
+                    if (existsCount == 0)
                     {
-                        nazivJson = file,
-                        StatusId = 1,
-                        SistemskiDatum = DateTime.Now
-                    };
-                    _db.DZOI_Vizim_Json.Add(newEntry);
-                    _db.SaveChanges();
-
-                }
-                else if (numberOfExistingFiles > 0)
-                {
-                    sb.Clear();
-                    sb.Append(file);
-                    sb.Replace(".JSON", "");
-                    sb.Append("_" + numberOfExistingFiles.ToString());
-                    sb.Append(".JSON");
-
-                    string putanjaKaFajlu = _sftpService.VratiPutanju();
-
-                    var oldFilePath = $"{putanjaKaFajlu}/{file}";
-                    var newFilePath = $"{putanjaKaFajlu}/{sb.ToString()}";
-
-                    _sftpService._sftpClient.Connect();
-
-                    _sftpService._sftpClient.RenameFile(oldFilePath, newFilePath);
-
-                    DZOI_Vizim_Json newEntry = new DZOI_Vizim_Json
+                        _db.DZOI_Vizim_Json.Add(new DZOI_Vizim_Json
+                        {
+                            nazivJson = file,
+                            StatusId = 1,
+                            SistemskiDatum = DateTime.Now
+                        });
+                        _db.SaveChanges();
+                    }
+                    else
                     {
-                        nazivJson = sb.ToString(),
-                        StatusId = 1,
-                        SistemskiDatum = DateTime.Now
-                    };
-                    _db.DZOI_Vizim_Json.Add(newEntry);
-                    _db.SaveChanges();
+                        sb.Clear();
+                        sb.Append(file).Replace(".JSON", "").Append('_').Append(existsCount).Append(".JSON");
 
-                }
-                else
-                {
-                    continue;
-                }
-                _sftpService._sftpClient.Disconnect();
+                        var root = _sftpService.VratiPutanju();
+                        _sftpService._sftpClient.RenameFile($"{root}/{file}", $"{root}/{sb}");
 
+                        _db.DZOI_Vizim_Json.Add(new DZOI_Vizim_Json
+                        {
+                            nazivJson = sb.ToString(),
+                            StatusId = 1,
+                            SistemskiDatum = DateTime.Now
+                        });
+                        _db.SaveChanges();
+                    }
+                });
             }
         }
 
@@ -106,9 +83,7 @@ namespace DZO_IntegracijaUstanovaDokumentacija_API.Managers
 
                 foreach (var rezultatItem in rezultat)
                 {
-                    string nazivString = new string(rezultatItem.nazivJson); // Konvertovanje niza char u string
-
-                    // string putanjaDoFajla = Path.Combine(_sftpService.RemotePath, nazivString);
+                    string nazivString = new string(rezultatItem.nazivJson);
 
                     string sadrzajFajla = _sftpService.UzmiSadrzajFajla(nazivString);
                     _sftpService.Disconnect();
@@ -127,7 +102,7 @@ namespace DZO_IntegracijaUstanovaDokumentacija_API.Managers
                         {
                             try
                             {
-                                _ = InsertPodatakaIzJsona(jsonObject, rezultatItem).Result;
+                                _ = await InsertPodatakaIzJsona(jsonObject, rezultatItem);
                                 _logger.AzurirajStatusVizimJson(rezultatItem.Id, 2);
                             }
                             catch (Exception ex)
@@ -151,7 +126,7 @@ namespace DZO_IntegracijaUstanovaDokumentacija_API.Managers
             catch (Exception ex)
             {
                 Console.WriteLine("Greška: " + ex.Message);
-                throw; // Bacaće originalnu grešku i možete videti tačan uzrok
+                throw;
             }
         }
 
@@ -176,9 +151,9 @@ namespace DZO_IntegracijaUstanovaDokumentacija_API.Managers
             };
             specifikacija = FormatTypeHelper.ToDataTableFromObject(zaglavljeTable);
 
-            List<RacunTable> racuni = [];
-            List<StavkaTable> stavke = [];
-            List<FajloviTable> fajlovi = [];
+            List<RacunTable> racuni = new();
+            List<StavkaTable> stavke = new();
+            List<FajloviTable> fajlovi = new();
             foreach (Racun rac in fileJson.Racun)
             {
                 if (!String.IsNullOrEmpty(rac.RacunFajl))
@@ -257,21 +232,12 @@ namespace DZO_IntegracijaUstanovaDokumentacija_API.Managers
 
             }
 
-
             _sftpService.PostojiFajl(listaFajlova, json.nazivJson);
-
-
-
 
             racun = FormatTypeHelper.ToDataTableFromList(racuni);
             stavka = FormatTypeHelper.ToDataTableFromList(stavke);
             fajl = FormatTypeHelper.ToDataTableFromList(fajlovi);
             return await _db.Procedures.DZOI_InsertSpecifikacijeRacunaFajlovaAsync(specifikacija, racun, stavka, fajl);
         }
-
-
-
-
     }
 }
-

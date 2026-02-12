@@ -14,95 +14,95 @@ namespace DZO_IntegracijaUstanovaDokumentacija_API.Managers
         {
             _sftpService = sftpService;
             _db = db;
-            _logger = logger;   
+            _logger = logger;
         }
-
 
         public void KreirajFoldere()
         {
             var rezultat = (from specifikacija in _db.DZOI_Vizim_Specifikacija
-                           join racun in _db.DZOI_Vizim_Racun on specifikacija.Id equals racun.IdSpecifikacije
-                           where specifikacija.StatusId == 1
-            select new
+                            join racun in _db.DZOI_Vizim_Racun on specifikacija.Id equals racun.IdSpecifikacije
+                            where specifikacija.StatusId == 1
+                            select new { specifikacija, brUputa = racun.UputBroj })
+                           .ToList();
+
+            using (_sftpService.ConnectScope())
             {
-              specifikacija,
-              brUputa = racun.UputBroj
-            }).ToList();
-
-            foreach (var item in rezultat)
-            {
-                string brUputa = new string(item.brUputa);
-                int IdJson = Convert.ToInt32(item.specifikacija.IdJson);
-                int IdSpec = Convert.ToInt32(item.specifikacija.Id);
-
-                try
-                {  
-                    string uspeh = _sftpService.KreirajFolderNaSFTP(brUputa);
-                    _sftpService.Disconnect();
-                    if (uspeh == "Neuspeh") 
-                    { 
-                        _logger.AzurirajStatusspecifikacije(IdJson, "pokusano kreiranje istog foldera", 3);  
-                    }
-                    else
-                    {
-                        var noviRed = new DZOI_Vizim_Folder
-                        {
-                            IdJson= IdJson,
-                            nazivFoldera = brUputa,
-                            StatusId = 1,
-                            IdSpec = IdSpec
-                        };
-                        _db.DZOI_Vizim_Folder.Add(noviRed);
-                        _db.SaveChanges();
-
-
-                    }
-                }
-                catch (Exception ex)
+                rezultat.ForEach(item =>
                 {
+                    var brUputa = new string(item.brUputa);
+                    var IdJson = Convert.ToInt32(item.specifikacija.IdJson);
+                    var IdSpec = Convert.ToInt32(item.specifikacija.Id);
 
-                    _logger.AzurirajStatusspecifikacije(IdJson, "desila se greska prilikom kreiranja foldera:"+ex, 3);
-                }
+                    try
+                    {
+                        var uspeh = _sftpService.KreirajFolderNaSFTP(brUputa);
+                        if (uspeh == "Neuspeh")
+                        {
+                            _logger.AzurirajStatusspecifikacije(IdJson, "pokusano kreiranje istog foldera", 3);
+                        }
+                        else
+                        {
+                            _db.DZOI_Vizim_Folder.Add(new DZOI_Vizim_Folder
+                            {
+                                IdJson = IdJson,
+                                nazivFoldera = brUputa,
+                                StatusId = 1,
+                                IdSpec = IdSpec
+                            });
+                            _db.SaveChanges();
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.AzurirajStatusspecifikacije(IdJson, "desila se greska prilikom kreiranja foldera:" + ex, 3);
+                    }
+                });
             }
         }
-        public  void PrebaciFajloveAsync()
-        {     
-             List < DZOI_VratiFajloveZaPrebacivanjeResult > fajlovi =  _db.Procedures.DZOI_VratiFajloveZaPrebacivanjeAsync().Result.ToList();
+        public void PrebaciFajloveAsync()
+        {
+            var fajlovi = _db.Procedures.DZOI_VratiFajloveZaPrebacivanjeAsync().Result.ToList();
 
-            var grupisaniFajlovi = fajlovi.GroupBy(f => f.IdJson);
-
-            foreach (var grupa in grupisaniFajlovi)
-            { 
-
-            foreach (var item in grupa)
+            fajlovi.GroupBy(f => f.IdJson).ToList().ForEach(grupa =>
             {
-                string brUputa = new string(item.UputBroj);
-                int IdJson = Convert.ToInt32(item.IdJson);
-                int idSpec = Convert.ToInt32(item.IdSpec);
-                string NazivFajla = new string(item.NazivFajla);
-             
-                try
+                using (_sftpService.ConnectScope())
                 {
-                    var uspeh =  _sftpService.PrebaciFajlove(brUputa,NazivFajla);
-                    if (uspeh == false) { _logger.LogError(IdJson, "fajl ili folder ne postoji", idSpec,4); _logger.AzurirajStatusFajlova(idSpec, NazivFajla, 3);
-                        _logger.AzurirajStatusspecifikacije(IdJson, 3); _logger.AzurirajStatusFoldera(IdJson, brUputa, 1);
-                            break;
-                    }
-                    else { _logger.AzurirajStatusFajlova(idSpec, NazivFajla, 2);  _logger.AzurirajStatusspecifikacije(IdJson,2);
-                            _logger.AzurirajStatusFoldera(IdJson, brUputa, 4);
+                    var stop = false;
+
+                    grupa.TakeWhile(_ => !stop).ToList().ForEach(item =>
+                    {
+                        var brUputa = new string(item.UputBroj);
+                        var IdJson = Convert.ToInt32(item.IdJson);
+                        var idSpec = Convert.ToInt32(item.IdSpec);
+                        var NazivFajla = new string(item.NazivFajla);
+
+                        try
+                        {
+                            var uspeh = _sftpService.PrebaciFajlove(brUputa, NazivFajla);
+                            if (!uspeh)
+                            {
+                                _logger.LogError(IdJson, "fajl ili folder ne postoji", idSpec, 4);
+                                _logger.AzurirajStatusFajlova(idSpec, NazivFajla, 3);
+                                _logger.AzurirajStatusspecifikacije(IdJson, 3);
+                                _logger.AzurirajStatusFoldera(IdJson, brUputa, 1);
+                                stop = true; // emulira 'break'
+                            }
+                            else
+                            {
+                                _logger.AzurirajStatusFajlova(idSpec, NazivFajla, 2);
+                                _logger.AzurirajStatusspecifikacije(IdJson, 2);
+                                _logger.AzurirajStatusFoldera(IdJson, brUputa, 4);
+                            }
                         }
+                        catch (Exception ex)
+                        {
+                            _logger.LogError(IdJson, "desila se greska prilikom prebacivanja fajla:" + ex, idSpec, 4);
+                            _logger.AzurirajStatusFajlova(idSpec, NazivFajla, 3);
+                            _logger.AzurirajStatusspecifikacije(IdJson, 3);
+                        }
+                    });
                 }
-                catch (Exception ex)
-                {
-
-                    _logger.LogError(IdJson, "desila se greska prilikom prebacivanja fajla:" + ex,idSpec,4);
-                    _logger.AzurirajStatusFajlova(idSpec, NazivFajla, 3);
-                    _logger.AzurirajStatusspecifikacije(IdJson, 3);
-                     continue;
-                }
-
-            }
-            }
+            });
         }
     }
 }

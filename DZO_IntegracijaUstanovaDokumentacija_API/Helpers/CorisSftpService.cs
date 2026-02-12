@@ -10,42 +10,39 @@ namespace DZO_IntegracijaUstanovaDokumentacija_API.Helpers
 {
     public class CorisSftpService : BaseSftpService
     {
-        
         private readonly GlobosSftpService _sftpService;
-       
+
         public CorisSftpService(IOptions<CorisSftpSetting> sftpSettings, GlobosSftpService sftpService)
-            :base(sftpSettings.Value.Host,sftpSettings.Value.Port ,sftpSettings.Value.Username, sftpSettings.Value.Password, sftpSettings.Value.RemotePath)
+            : base(sftpSettings.Value.Host, sftpSettings.Value.Port, sftpSettings.Value.Username, sftpSettings.Value.Password, sftpSettings.Value.RemotePath)
         {
-            
-            _sftpService = sftpService;   
+            _sftpService = sftpService;
         }
-     
 
         public List<string> PrebaciFoldereSFTP(string naziv)
         {
-            var remotePath = _remotePath;
-            var homePath = $"{_sftpService._remotePath}/{naziv}";
-            var destinationPath = $"{remotePath}/{naziv}";
-            var homePathPOSLATO = $"{_sftpService._remotePath}/POSLATO/{naziv}";
-            var homePathGRESKA = $"{_sftpService._remotePath}/GRESKA/{naziv}";
-            try
+            var sourceRoot = _sftpService._remotePath; // Globos
+            var destRoot = _remotePath;              // CORIS
+
+            var homePath = $"{sourceRoot}/{naziv}";
+            var destinationPath = $"{destRoot}/{naziv}";
+            var homePathPOSLATO = $"{sourceRoot}/POSLATO/{naziv}";
+            var homePathGRESKA = $"{sourceRoot}/GRESKA/{naziv}";
+
+            using (_sftpService.ConnectScope())
+            using (this.ConnectScope())
             {
-                _sftpService._sftpClient.Connect();               
-
-                CreateDirectoryRecursively(destinationPath, _sftpClient);
-
-                UploadDirectoryContents(homePath, destinationPath);
-
-                MoveFolder(homePath, homePathPOSLATO);
-
-                return new List<string> { "Uspeh", "" };
-
-            }
-            catch (Exception ex)
-            {
-                MoveFolder(homePath, homePathGRESKA);
-                return new List<string> { "Neuspeh", "" };
-
+                try
+                {
+                    CreateDirectoryRecursively(destinationPath, _sftpClient);
+                    UploadDirectoryContents(homePath, destinationPath);
+                    MoveFolder(homePath, homePathPOSLATO);
+                    return new List<string> { "Uspeh", "" };
+                }
+                catch (Exception ex)
+                {
+                    try { MoveFolder(homePath, homePathGRESKA); } catch { }
+                    return new List<string> { "Neuspeh", ex.Message ?? "" };
+                }
             }
         }
 
@@ -54,69 +51,59 @@ namespace DZO_IntegracijaUstanovaDokumentacija_API.Helpers
             var files = _sftpService._sftpClient.ListDirectory(sourcePath);
             foreach (var file in files)
             {
-                if (!file.IsDirectory)
+                if (file.IsDirectory || file.Name.StartsWith(".")) continue;
+                using (var fileStream = _sftpService._sftpClient.OpenRead(file.FullName))
                 {
-                    using (var fileStream = _sftpService._sftpClient.OpenRead(file.FullName))
-                    {
-                        var remoteFilePath = $"{destinationPath}/{file.Name}";
-                        _sftpClient.UploadFile(fileStream, remoteFilePath);
-                    }
+                    var remoteFilePath = $"{destinationPath}/{file.Name}";
+                    _sftpClient.UploadFile(fileStream, remoteFilePath);
                 }
             }
-
-            
         }
 
         private void CreateDirectoryRecursively(string targetPath, SftpClient client)
         {
-            string currentPath = "";
-            if (targetPath[0] == '.')
-            {
-                currentPath = ".";
-                targetPath = targetPath[1..];
-            }
-            foreach (string segment in targetPath.Split('/'))
-            {
-                // Ignoring leading/ending/multiple slashes
-                if (!string.IsNullOrWhiteSpace(segment))
+            if (string.IsNullOrWhiteSpace(targetPath)) return;
+
+            var normalized = targetPath.Replace('\\', '/');
+            var startsWithDot = normalized.StartsWith(".");
+            var initial = startsWithDot ? "." : "";
+            var tail = startsWithDot ? normalized.Substring(1) : normalized;
+
+            tail.Split('/', StringSplitOptions.RemoveEmptyEntries)
+                .Aggregate(initial, (current, seg) =>
                 {
-                    currentPath += $"/{segment}";
-                    if (!client.Exists(currentPath))
-                        client.CreateDirectory(currentPath);
-                }
-            }
+                    var next = string.IsNullOrEmpty(current) || current == "."
+                        ? $"{current}/{seg}".Replace("//", "/")
+                        : $"{current}/{seg}";
+                    if (!client.Exists(next)) client.CreateDirectory(next);
+                    return next;
+                });
         }
+
 
         private void MoveFolder(string sourcePath, string destinationPath)
         {
-            if (!_sftpService._sftpClient.Exists(destinationPath))
-            {
-                CreateDirectoryRecursively(destinationPath, _sftpService._sftpClient);
-            }
+            var src = _sftpService._sftpClient;
 
-            var files = _sftpService._sftpClient.ListDirectory(sourcePath);
-            foreach (var file in files)
-            {
-                if (!file.Name.StartsWith("."))
-                {
-                    var sourceFilePath = file.FullName;
-                    var destFilePath = $"{destinationPath}/{file.Name}";
+            if (!src.Exists(destinationPath))
+                CreateDirectoryRecursively(destinationPath, src);
 
-                    if (file.IsDirectory)
-                    {
-                        MoveFolder(sourceFilePath, destFilePath);
-                    }
-                    else
-                    {
-                        _sftpService._sftpClient.RenameFile(sourceFilePath, destFilePath);
-                    }
-                }
-            }
+            src.ListDirectory(sourcePath)
+               .Where(e => e.Name.Length == 0 || e.Name[0] != '.')
+               .ToList()
+               .ForEach(entry =>
+               {
+                   var sourceFilePath = entry.FullName;
+                   var destFilePath = $"{destinationPath}/{entry.Name}";
 
-            _sftpService._sftpClient.DeleteDirectory(sourcePath);
+                   if (entry.IsDirectory)
+                       MoveFolder(sourceFilePath, destFilePath);
+                   else
+                       src.RenameFile(sourceFilePath, destFilePath);
+               });
+
+            src.DeleteDirectory(sourcePath);
         }
 
     }
-
 }
-

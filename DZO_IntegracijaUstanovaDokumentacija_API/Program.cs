@@ -1,44 +1,79 @@
+using System;
 using DZO_IntegracijaUstanovaDokumentacija_API.Helpers;
 using DZO_IntegracijaUstanovaDokumentacija_API.Models.DataTransferObjects;
 using Microsoft.AspNetCore.Builder;
-using Microsoft.Extensions.Configuration;
+using Microsoft.AspNetCore.Diagnostics;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Dodavanje konfiguracije iz appsettings.json
-IConfigurationRoot? config = new ConfigurationBuilder()
-                                .AddJsonFile("appsettings.json")
-                                .AddJsonFile($"appsettings.{builder.Environment.EnvironmentName}.json", optional: true)
-                                .Build();
+// Configuration (koristi ugra?eni builder.Configuration)
+var configuration = builder.Configuration;
 
-builder.Configuration.AddEnvironmentVariables();
+// Connection string: fail-fast ako nedostaje
+var defaultConnectionString = configuration.GetConnectionString("DefaultConnection")
+    ?? throw new InvalidOperationException("Missing connection string 'DefaultConnection' in appsettings");
 
-string? defaultConnectionString = builder.Configuration.GetConnectionString("DefaultConnection");
-builder.Services.AddDbContext<RazmenaDokumentacijeDb_Context>(options => options.UseSqlServer(defaultConnectionString));
+// DbContext pool + SQL retry + detalji u Dev
+builder.Services.AddDbContextPool<RazmenaDokumentacijeDb_Context>(options =>
+{
+    options.UseSqlServer(defaultConnectionString, sql =>
+    {
+        sql.EnableRetryOnFailure(
+            maxRetryCount: 5,
+            maxRetryDelay: TimeSpan.FromSeconds(10),
+            errorNumbersToAdd: null);
+    });
 
-// Konfiguracija GlobosSftpSetting
-builder.Services.Configure<GlobosSftpSetting>(builder.Configuration.GetSection("GlobosSftpSettings"));
-builder.Services.Configure<CorisSftpSetting>(builder.Configuration.GetSection("CorisSftpSettings"));
-builder.Services.Configure<MediGroupSftpSettings>(builder.Configuration.GetSection("MediGroupSftpSettings"));
+    if (builder.Environment.IsDevelopment())
+    {
+        options.EnableDetailedErrors();
+        options.EnableSensitiveDataLogging();
+    }
+});
 
-// Dodavanje GlobosSftpService kao singleton
-builder.Services.AddSingleton<GlobosSftpService>();
-builder.Services.AddSingleton<CorisSftpService>();
-builder.Services.AddSingleton<MediGroupSftpService>();
+// Options binding + validacija na startu
+builder.Services.AddOptions<GlobosSftpSetting>()
+    .Bind(configuration.GetSection("GlobosSftpSettings"))
+    .ValidateDataAnnotations()
+    .ValidateOnStart();
 
+builder.Services.AddOptions<CorisSftpSetting>()
+    .Bind(configuration.GetSection("CorisSftpSettings"))
+    .ValidateDataAnnotations()
+    .ValidateOnStart();
+
+builder.Services.AddOptions<MediGroupSftpSettings>()
+    .Bind(configuration.GetSection("MediGroupSftpSettings"))
+    .ValidateDataAnnotations()
+    .ValidateOnStart();
+
+// SFTP servisi: Transient (ili Scoped) — bez Singleton
+builder.Services.AddTransient<GlobosSftpService>();
+builder.Services.AddTransient<CorisSftpService>();
+builder.Services.AddTransient<MediGroupSftpService>();
 
 builder.Services.AddScoped<Logovi>();
 
-// Dodavanje ostalih servisa
-builder.Services.AddControllers();
+// Controllers + JSON
+builder.Services.AddControllers().AddJsonOptions(o =>
+{
+    o.JsonSerializerOptions.PropertyNameCaseInsensitive = true;
+    o.JsonSerializerOptions.WriteIndented = builder.Environment.IsDevelopment();
+});
+
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddHttpContextAccessor();
 
+builder.Services.AddProblemDetails();
+builder.Services.AddHealthChecks();
+
 var app = builder.Build();
+
+app.UseExceptionHandler(_ => { /* ProblemDetails ?e generisati telo */ });
 
 if (app.Environment.IsDevelopment())
 {
@@ -48,9 +83,9 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseRouting();
-
 app.UseAuthorization();
 
 app.MapControllers();
+app.MapHealthChecks("/health");
 
 app.Run();

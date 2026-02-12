@@ -1,167 +1,118 @@
 ﻿using DZO_IntegracijaUstanovaDokumentacija_API.AbstractClasses;
-using DZO_IntegracijaUstanovaDokumentacija_API.Interfaces;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
-using Renci.SshNet;
-using Renci.SshNet.Sftp;
-using System.Collections;
-using System.Collections.Generic;
-using System.IO;
-using System.Text;
-using static System.Net.WebRequestMethods;
 
 namespace DZO_IntegracijaUstanovaDokumentacija_API.Helpers
 {
     public class GlobosSftpService : BaseSftpService
     {
-
         public GlobosSftpService(IOptions<GlobosSftpSetting> sftpSettings)
-         : base(sftpSettings.Value.Host, sftpSettings.Value.Port, sftpSettings.Value.Username, sftpSettings.Value.Password, sftpSettings.Value.RemotePath)
-        {
-
-        }
-
-
+            : base(sftpSettings.Value.Host, sftpSettings.Value.Port, sftpSettings.Value.Username, sftpSettings.Value.Password, sftpSettings.Value.RemotePath)
+        { }
 
         public List<string> ListaJsona()
         {
-            Connect();
-
-            var files = new List<string>();
-
-            var directory = _sftpClient.ListDirectory(_remotePath);
-            foreach (var fileInfo in directory)
+            using (ConnectScope())
             {
-                if (!fileInfo.IsDirectory && fileInfo.Name.EndsWith(".json", StringComparison.OrdinalIgnoreCase))
-                {
-                    files.Add(fileInfo.Name);
-                }
+                return _sftpClient.ListDirectory(_remotePath)
+                    .Where(f => !f.IsDirectory
+                             && f.Name.Length >= 6                   // .json
+                             && f.Name[0] != '.'
+                             && f.Name.EndsWith(".json", StringComparison.OrdinalIgnoreCase))
+                    .Select(f => f.Name)
+                    .ToList();
             }
-
-            Disconnect();
-
-            return files;
         }
 
         public string UzmiSadrzajFajla(string file)
         {
-
-            Connect();
+            using (ConnectScope())
             using (var stream = _sftpClient.OpenRead(file))
+            using (var reader = new StreamReader(stream))
             {
-                using (var reader = new StreamReader(stream))
-                {
-                    return reader.ReadToEnd();
-
-                }
-
+                return reader.ReadToEnd();
             }
-
-
-
-
-
         }
 
         public string KreirajFolderNaSFTP(string nazivFoldera)
         {
-
-            Connect();
-
-            // string putanjaDoFoldera = _remotePath+" / "+nazivFoldera;
-
-            if (!_sftpClient.Exists(nazivFoldera))
+            using (ConnectScope())
             {
-                _sftpClient.CreateDirectory(nazivFoldera);
-
-
-                return "Uspeh";
-            }
-            else
-            {
-                return "Neuspeh";
-            }
-
-
-        }
-        public bool PrebaciFajlove(string brUputa, string NazivFajla)
-        {
-
-            string putanjaDoFajla = _remotePath + "/" + NazivFajla;
-            string putanjaDoFoldera = _remotePath + "/" + brUputa;
-
-            Connect();
-
-            var files = _sftpClient.ListDirectory(_remotePath);
-
-            bool pdfExists = files.Any(f => f.Name == NazivFajla && !f.IsDirectory);
-
-            if (_sftpClient.Exists(putanjaDoFoldera))
-            {
-                if (pdfExists)
+                var full = $"{_remotePath}/{nazivFoldera}";
+                if (!_sftpClient.Exists(full))
                 {
-                    _sftpClient.RenameFile(putanjaDoFajla, putanjaDoFoldera + "/" + NazivFajla);
-                    return true;
+                    var segments = full.Split('/', System.StringSplitOptions.RemoveEmptyEntries);
+                    var current = "";
+                    foreach (var seg in segments)
+                    {
+                        current += "/" + seg;
+                        if (!_sftpClient.Exists(current)) _sftpClient.CreateDirectory(current);
+                    }
+                    return "Uspeh";
                 }
                 else
                 {
-                    return false;
+                    return "Neuspeh";
                 }
             }
-            else
+        }
+
+        public bool PrebaciFajlove(string brUputa, string NazivFajla)
+        {
+            var putanjaDoFajla = $"{_remotePath}/{NazivFajla}";
+            var putanjaDoFoldera = $"{_remotePath}/{brUputa}";
+
+            using (ConnectScope())
             {
+                if (_sftpClient.Exists(putanjaDoFoldera) && _sftpClient.Exists(putanjaDoFajla))
+                {
+                    _sftpClient.RenameFile(putanjaDoFajla, $"{putanjaDoFoldera}/{NazivFajla}");
+                    return true;
+                }
                 return false;
             }
-
-
-
-
-
         }
 
         public List<string> ListaFoldera()
         {
-
-            Connect();
-
-            var folderi = _sftpClient.ListDirectory(_remotePath)
-                                     .Where(f => f.IsDirectory)
-                                     .Select(f => f.Name)
-                                     .ToList();
-
-            Disconnect();
-
-            return folderi;
-
-
+            using (ConnectScope())
+            {
+                return _sftpClient.ListDirectory(_remotePath)
+                                  .Where(f => f.IsDirectory && !f.Name.StartsWith("."))
+                                  .Select(f => f.Name)
+                                  .ToList();
+            }
         }
 
-
-        public string VratiPutanju()
-        {
-            return _remotePath;
-        }
-
+        public string VratiPutanju() => _remotePath;
 
         public void PostojiFajl(List<string> files, string jsonFile)
         {
-            Connect();
-
-            foreach (string file in files)
+            using (ConnectScope())
             {
-                string filePath = $"{_remotePath}/{jsonFile}";
-                string errorPath = $"{_remotePath}/GRESKA/{jsonFile}";
-                if (!_sftpClient.Exists($"{_remotePath}/{file}"))
+                foreach (var f in files)
                 {
-                    _sftpClient.RenameFile(filePath, errorPath);
-                    throw new Exception($"{file} ne postoji na SFTP serveru");
+                    if (!_sftpClient.Exists($"{_remotePath}/{f}"))
+                    {
+                        var filePath = $"{_remotePath}/{jsonFile}";
+                        var errorRoot = $"{_remotePath}/GRESKA";
+                        var errorPath = $"{errorRoot}/{jsonFile}";
+
+                        if (!_sftpClient.Exists(errorRoot))
+                        {
+                            var segments = errorRoot.Split('/', System.StringSplitOptions.RemoveEmptyEntries);
+                            var current = "";
+                            foreach (var seg in segments)
+                            {
+                                current += "/" + seg;
+                                if (!_sftpClient.Exists(current)) _sftpClient.CreateDirectory(current);
+                            }
+                        }
+
+                        _sftpClient.RenameFile(filePath, errorPath);
+                        throw new System.Exception($"{f} ne postoji na SFTP serveru");
+                    }
                 }
-
             }
-            Disconnect();
         }
-
     }
-
 }
-

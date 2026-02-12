@@ -18,51 +18,41 @@ namespace DZO_IntegracijaUstanovaDokumentacija_API.Managers
 
         public void PrebaciFoldere()
         {
-            var NazivFoldera = _db.DZOI_Vizim_Folder.Where(d => d.StatusId == 4).ToList();
-           
-            foreach (var folderzaslanje in NazivFoldera)
+            _db.DZOI_Vizim_Folder.Where(d => d.StatusId == 4).ToList().ForEach(folderzaslanje =>
             {
-                string naziv = new string(folderzaslanje.nazivFoldera);
-                int IdJson =  Convert.ToInt32(folderzaslanje.IdJson);
-                int IdSpec = Convert.ToInt32(folderzaslanje.IdSpec);
+                var naziv = new string(folderzaslanje.nazivFoldera);
+                var IdJson = Convert.ToInt32(folderzaslanje.IdJson);
+                var IdSpec = Convert.ToInt32(folderzaslanje.IdSpec);
 
                 try
                 {
-
-                    _sftpService.Connect();
-
-                    _sftpServiceCor.Connect();
-
-                    var listaFoldera = _sftpService.ListaFoldera();
-
-                    foreach (var folder in listaFoldera)
+                    using (_sftpService.ConnectScope())
+                    using (_sftpServiceCor.ConnectScope())
                     {
-
-                        if (folder.Equals(naziv, StringComparison.OrdinalIgnoreCase))
-                        {
-
-                            var uspeh = _sftpServiceCor.PrebaciFoldereSFTP(naziv);
-                            if (uspeh[0] == "Neuspeh") {
-                                _logger.LogError(IdJson, "nije se kopirao folder:" + uspeh[1], IdSpec,5); _logger.AzurirajStatusFoldera(IdJson, naziv, 3);//kopiraj u gresku
-                                continue; }
-                            else {
-                                _logger.AzurirajStatusFoldera(IdJson, naziv, 2); 
-                            }
-                        } 
+                        _sftpService.ListaFoldera()
+                            .Where(f => f.Equals(naziv, StringComparison.OrdinalIgnoreCase))
+                            .Take(1) // samo taj folder
+                            .ToList()
+                            .ForEach(_ =>
+                            {
+                                var uspeh = _sftpServiceCor.PrebaciFoldereSFTP(naziv);
+                                if (uspeh[0] == "Neuspeh")
+                                {
+                                    _logger.LogError(IdJson, "nije se kopirao folder:" + uspeh[1], IdSpec, 5);
+                                    _logger.AzurirajStatusFoldera(IdJson, naziv, 3);
+                                }
+                                else
+                                {
+                                    _logger.AzurirajStatusFoldera(IdJson, naziv, 2);
+                                }
+                            });
                     }
-
                 }
                 catch (Exception ex)
                 {
-
-                    _logger.LogError(IdJson, "nije se kopirao folder:" + ex.ToString(),IdSpec,5);
+                    _logger.LogError(IdJson, "nije se kopirao folder:" + ex.ToString(), IdSpec, 5);
                 }
-            }
-
-         
-
-               
-
+            });
         }
     }
 }
