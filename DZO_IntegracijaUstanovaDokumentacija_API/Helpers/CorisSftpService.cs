@@ -8,27 +8,28 @@ using System.Reflection.Metadata.Ecma335;
 
 namespace DZO_IntegracijaUstanovaDokumentacija_API.Helpers
 {
+
     public class CorisSftpService : BaseSftpService
     {
-        private readonly GlobosSftpService _sftpService;
+        private readonly GlobosSftpService _globos;
 
-        public CorisSftpService(IOptions<CorisSftpSetting> sftpSettings, GlobosSftpService sftpService)
+        public CorisSftpService(IOptions<CorisSftpSetting> sftpSettings, GlobosSftpService globosSftpService)
             : base(sftpSettings.Value.Host, sftpSettings.Value.Port, sftpSettings.Value.Username, sftpSettings.Value.Password, sftpSettings.Value.RemotePath)
         {
-            _sftpService = sftpService;
+            _globos = globosSftpService;
         }
 
-        public List<string> PrebaciFoldereSFTP(string naziv)
+        public SftpTransferResult PrebaciFolderNaCoris(string naziv)
         {
-            var sourceRoot = _sftpService._remotePath; // Globos
-            var destRoot = _remotePath;              // CORIS
+            var sourceRoot = _globos._remotePath; // Globos
+            var destRoot = _remotePath;           // CORIS
 
             var homePath = $"{sourceRoot}/{naziv}";
             var destinationPath = $"{destRoot}/{naziv}";
             var homePathPOSLATO = $"{sourceRoot}/POSLATO/{naziv}";
             var homePathGRESKA = $"{sourceRoot}/GRESKA/{naziv}";
 
-            using (_sftpService.ConnectScope())
+            using (_globos.ConnectScope())
             using (this.ConnectScope())
             {
                 try
@@ -36,27 +37,26 @@ namespace DZO_IntegracijaUstanovaDokumentacija_API.Helpers
                     CreateDirectoryRecursively(destinationPath, _sftpClient);
                     UploadDirectoryContents(homePath, destinationPath);
                     MoveFolder(homePath, homePathPOSLATO);
-                    return new List<string> { "Uspeh", "" };
+                    return SftpTransferResult.Ok();
                 }
                 catch (Exception ex)
                 {
                     try { MoveFolder(homePath, homePathGRESKA); } catch { }
-                    return new List<string> { "Neuspeh", ex.Message ?? "" };
+                    return SftpTransferResult.Fail(ex.Message ?? "Nepoznata greška pri prebacivanju foldera");
                 }
             }
         }
 
         private void UploadDirectoryContents(string sourcePath, string destinationPath)
         {
-            var files = _sftpService._sftpClient.ListDirectory(sourcePath);
+            var files = _globos._sftpClient.ListDirectory(sourcePath);
             foreach (var file in files)
             {
                 if (file.IsDirectory || file.Name.StartsWith(".")) continue;
-                using (var fileStream = _sftpService._sftpClient.OpenRead(file.FullName))
-                {
-                    var remoteFilePath = $"{destinationPath}/{file.Name}";
-                    _sftpClient.UploadFile(fileStream, remoteFilePath);
-                }
+
+                using var fileStream = _globos._sftpClient.OpenRead(file.FullName);
+                var remoteFilePath = $"{destinationPath}/{file.Name}";
+                _sftpClient.UploadFile(fileStream, remoteFilePath);
             }
         }
 
@@ -75,15 +75,15 @@ namespace DZO_IntegracijaUstanovaDokumentacija_API.Helpers
                     var next = string.IsNullOrEmpty(current) || current == "."
                         ? $"{current}/{seg}".Replace("//", "/")
                         : $"{current}/{seg}";
+
                     if (!client.Exists(next)) client.CreateDirectory(next);
                     return next;
                 });
         }
 
-
         private void MoveFolder(string sourcePath, string destinationPath)
         {
-            var src = _sftpService._sftpClient;
+            var src = _globos._sftpClient;
 
             if (!src.Exists(destinationPath))
                 CreateDirectoryRecursively(destinationPath, src);
@@ -104,6 +104,5 @@ namespace DZO_IntegracijaUstanovaDokumentacija_API.Helpers
 
             src.DeleteDirectory(sourcePath);
         }
-
     }
 }

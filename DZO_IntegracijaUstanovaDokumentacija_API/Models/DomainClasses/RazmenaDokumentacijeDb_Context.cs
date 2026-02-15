@@ -15,9 +15,7 @@ public partial class RazmenaDokumentacijeDb_Context : DbContext
 
     public virtual DbSet<DZOI_LogProcedureError> DZOI_LogProcedureError { get; set; }
 
-    public virtual DbSet<DZOI_MediGroup_ErrorZip> DZOI_MediGroup_ErrorZip { get; set; }
-
-    public virtual DbSet<DZOI_MediGroup_Zip> DZOI_MediGroup_Zip { get; set; }
+    public virtual DbSet<DZOI_SpisakMetoda> DZOI_SpisakMetoda { get; set; }
 
     public virtual DbSet<DZOI_Status> DZOI_Status { get; set; }
 
@@ -37,78 +35,46 @@ public partial class RazmenaDokumentacijeDb_Context : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        modelBuilder.Entity<DZOI_LogProcedureError>(entity =>
-        {
-            entity.HasKey(e => e.Id).HasName("PK__DZOI_Log__3214EC07CF91B0EA");
-        });
-
-        modelBuilder.Entity<DZOI_MediGroup_ErrorZip>(entity =>
-        {
-            entity.Property(e => e.SistemskiDatum).HasDefaultValueSql("(getdate())");
-        });
-
-        modelBuilder.Entity<DZOI_MediGroup_Zip>(entity =>
-        {
-            entity.HasOne(d => d.Status).WithMany(p => p.DZOI_MediGroup_Zip).HasConstraintName("FK_DZOI_MediGroup_Zip_DZOI_Status");
-        });
-
         modelBuilder.Entity<DZOI_Status>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__DZOI_Sta__3214EC0704D22D14");
+            entity.HasKey(e => e.Id).HasName("PK__DZOI_Sta__3214EC07244A9EFC");
         });
 
         modelBuilder.Entity<DZOI_Vizim_ErrorJson>(entity =>
         {
-            entity.Property(e => e.SistemskiDatum).HasDefaultValueSql("(getdate())");
-
-            entity.HasOne(d => d.IdJsonNavigation).WithMany(p => p.DZOI_Vizim_ErrorJson).HasConstraintName("FK_DZOI_Vizim_ErrorJson_DZOI_Vizim_Json");
+            entity.Property(e => e.SistemskiDatum)
+                .HasDefaultValueSql("(getdate())")
+                .HasAnnotation("Relational:DefaultConstraintName", "DF_DZOI_Vizim_ErrorJson_SistemskiDatum");
         });
 
         modelBuilder.Entity<DZOI_Vizim_Fajlovi>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__DZOI_Viz__3214EC07D131233A");
+            entity.HasKey(e => e.Id).HasName("PK__DZOI_Viz__3214EC07F62C86C2");
 
-            entity.HasOne(d => d.IdSpecifikacijeNavigation).WithMany(p => p.DZOI_Vizim_Fajlovi).HasConstraintName("FK__DZOI_Vizi__IdSpe__3C69FB99");
-
-            entity.HasOne(d => d.Status).WithMany(p => p.DZOI_Vizim_Fajlovi).HasConstraintName("FK__DZOI_Vizi__Statu__3D5E1FD2");
-        });
-
-        modelBuilder.Entity<DZOI_Vizim_Folder>(entity =>
-        {
-            entity.HasOne(d => d.Status).WithMany(p => p.DZOI_Vizim_Folder).HasConstraintName("FK_DZOI_Vizim_Folder_DZOI_Status");
-        });
-
-        modelBuilder.Entity<DZOI_Vizim_Json>(entity =>
-        {
-            entity.Property(e => e.SistemskiDatum).HasDefaultValueSql("(getdate())");
-
-            entity.HasOne(d => d.Status).WithMany(p => p.DZOI_Vizim_Json).HasConstraintName("FK_DZOI_Vizim_Json_DZOI_Status");
+            entity.HasOne(d => d.IdSpecifikacijeNavigation).WithMany(p => p.DZOI_Vizim_Fajlovi).HasConstraintName("FK__DZOI_Vizi__IdSpe__5AEE82B9");
         });
 
         modelBuilder.Entity<DZOI_Vizim_Racun>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__DZOI_Viz__3214EC07F4AE1BB2");
+            entity.HasKey(e => e.Id).HasName("PK__DZOI_Viz__3214EC07CE61C473");
 
-            entity.HasOne(d => d.IdSpecifikacijeNavigation).WithMany(p => p.DZOI_Vizim_Racun).HasConstraintName("FK__DZOI_Vizi__IdSpe__403A8C7D");
+            entity.HasOne(d => d.IdSpecifikacijeNavigation).WithMany(p => p.DZOI_Vizim_Racun).HasConstraintName("FK__DZOI_Vizi__IdSpe__5EBF139D");
         });
 
         modelBuilder.Entity<DZOI_Vizim_Specifikacija>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__DZOI_Viz__3214EC07F1300A31");
+            entity.HasKey(e => e.Id).HasName("PK__DZOI_Viz__3214EC070E3B55CE");
 
             entity.HasOne(d => d.IdJsonNavigation).WithMany(p => p.DZOI_Vizim_Specifikacija).HasConstraintName("FK_DZOI_Vizim_Specifikacija_DZOI_Vizim_Json");
-
-            entity.HasOne(d => d.Status).WithMany(p => p.DZOI_Vizim_Specifikacija).HasConstraintName("FK__DZOI_Vizi__Statu__412EB0B6");
         });
 
         modelBuilder.Entity<DZOI_Vizim_StavkeRacuna>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__DZOI_Viz__3214EC07539E8DC1");
+            entity.HasKey(e => e.Id).HasName("PK__DZOI_Viz__3214EC07276DD272");
 
-            entity.HasOne(d => d.IdRacunaNavigation).WithMany(p => p.DZOI_Vizim_StavkeRacuna).HasConstraintName("FK__DZOI_Vizi__IdRac__4316F928");
+            entity.HasOne(d => d.IdRacunaNavigation).WithMany(p => p.DZOI_Vizim_StavkeRacuna).HasConstraintName("FK__DZOI_Vizi__IdRac__619B8048");
         });
 
-        OnModelCreatingGeneratedProcedures(modelBuilder);
         OnModelCreatingPartial(modelBuilder);
     }
 

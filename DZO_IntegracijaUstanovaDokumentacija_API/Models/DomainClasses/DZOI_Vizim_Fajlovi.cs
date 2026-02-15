@@ -26,8 +26,4 @@ public partial class DZOI_Vizim_Fajlovi
     [ForeignKey("IdSpecifikacije")]
     [InverseProperty("DZOI_Vizim_Fajlovi")]
     public virtual DZOI_Vizim_Specifikacija IdSpecifikacijeNavigation { get; set; }
-
-    [ForeignKey("StatusId")]
-    [InverseProperty("DZOI_Vizim_Fajlovi")]
-    public virtual DZOI_Status Status { get; set; }
 }

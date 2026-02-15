@@ -1,4 +1,6 @@
-﻿using DZO_IntegracijaUstanovaDokumentacija_API.Helpers;
+﻿using DZO_IntegracijaUstanovaDokumentacija_API.Api;
+using DZO_IntegracijaUstanovaDokumentacija_API.Errors;
+using DZO_IntegracijaUstanovaDokumentacija_API.Helpers;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -9,51 +11,25 @@ namespace DZO_IntegracijaUstanovaDokumentacija_API.Controllers
     [ApiController]
     public class PrebacivanjeFajlovaController : ControllerBase
     {
-        private readonly GlobosSftpService _sftpService;
-        private readonly RazmenaDokumentacijeDb_Context _db;
-        private readonly Logovi _logger;
-        public PrebacivanjeFajlovaController(GlobosSftpService sftpService, RazmenaDokumentacijeDb_Context db, Logovi logger)
-        {
-            _sftpService = sftpService;
-            _db = db;
-            _logger = logger;   
-        }
+        private readonly PrebacivanjeFajlovaManager _manager;
 
+        public PrebacivanjeFajlovaController(PrebacivanjeFajlovaManager manager)
+        {
+            _manager = manager;
+        }
 
         [HttpGet("kreirajFoldere")]
-        public IActionResult KreirajFoldere()
+        public ActionResult<ApiResponse<OperationSummary>> KreirajFoldere()
         {
-            try
-            {
-                PrebacivanjeFajlovaManager manager = new(_sftpService, _db, _logger);
-                manager.KreirajFoldere();
-                return Ok();
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, $"kreiranje foldera: {ex.Message}");
-            }
-
+            var summary = _manager.KreirajFoldere();
+            return Ok(ApiResponse<OperationSummary>.FromOperation(HttpContext, summary));
         }
-
 
         [HttpGet("prebaciFajlove")]
-        public IActionResult PrebaciFajlove()
+        public async Task<ActionResult<ApiResponse<OperationSummary>>> PrebaciFajlove()
         {
-            try
-            {
-                PrebacivanjeFajlovaManager manager = new(_sftpService, _db, _logger);
-                manager.PrebaciFajloveAsync();
-                return Ok();
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, $"prebacivanje fajlova: {ex.Message}");
-            }
-
+            var summary = await _manager.PrebaciFajloveAsync();
+            return Ok(ApiResponse<OperationSummary>.FromOperation(HttpContext, summary));
         }
-
-
-
     }
 }

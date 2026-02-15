@@ -2,17 +2,20 @@
    "CodeGenerationMode": 4,
    "ContextClassName": "RazmenaDokumentacijeDb_Context",
    "ContextNamespace": null,
-   "DefaultDacpacSchema": null,
    "FilterSchemas": false,
    "IncludeConnectionString": false,
+   "IrregularWords": null,
+   "MinimumProductVersion": "2.6.1378",
    "ModelNamespace": null,
    "OutputContextPath": null,
    "OutputPath": "Models\/DomainClasses",
+   "PluralRules": null,
    "PreserveCasingWithRegex": true,
    "ProjectRootNamespace": "DZO_IntegracijaUstanovaDokumentacija_API",
    "Schemas": null,
    "SelectedHandlebarsLanguage": 2,
    "SelectedToBeGenerated": 0,
+   "SingularRules": null,
    "T4TemplatePath": null,
    "Tables": [
       {
@@ -20,11 +23,7 @@
          "ObjectType": 0
       },
       {
-         "Name": "[dbo].[DZOI_MediGroup_ErrorZip]",
-         "ObjectType": 0
-      },
-      {
-         "Name": "[dbo].[DZOI_MediGroup_Zip]",
+         "Name": "[dbo].[DZOI_SpisakMetoda]",
          "ObjectType": 0
       },
       {
@@ -68,24 +67,32 @@
          "ObjectType": 1
       }
    ],
-   "UiHint": "globos-sql.RazmenaDokumentacijeDb.dbo",
+   "UiHint": null,
    "UncountableWords": null,
+   "UseAsyncStoredProcedureCalls": true,
    "UseBoolPropertiesWithoutDefaultSql": false,
    "UseDatabaseNames": true,
+   "UseDatabaseNamesForRoutines": true,
    "UseDateOnlyTimeOnly": false,
    "UseDbContextSplitting": false,
+   "UseDecimalDataAnnotationForSprocResult": true,
    "UseFluentApiOnly": false,
    "UseHandleBars": false,
    "UseHierarchyId": false,
    "UseInflector": false,
+   "UseInternalAccessModifiersForSprocsAndFunctions": false,
    "UseLegacyPluralizer": false,
-   "UseManyToManyEntity": true,
+   "UseManyToManyEntity": false,
    "UseNoDefaultConstructor": false,
+   "UseNoNavigations": false,
    "UseNoObjectFilter": false,
    "UseNodaTime": false,
    "UseNullableReferences": false,
+   "UsePrefixNavigationNaming": false,
    "UseSchemaFolders": false,
    "UseSchemaNamespaces": false,
    "UseSpatial": false,
-   "UseT4": false
+   "UseT4": false,
+   "UseT4Split": false,
+   "UseTypedTvpParameters": true
 }

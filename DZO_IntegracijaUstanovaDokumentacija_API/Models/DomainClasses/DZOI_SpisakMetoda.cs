@@ -8,22 +8,12 @@ using Microsoft.EntityFrameworkCore;
 
 namespace DZO_IntegracijaUstanovaDokumentacija_API.Models.DomainClasses;
 
-public partial class DZOI_MediGroup_ErrorZip
+public partial class DZOI_SpisakMetoda
 {
     [Key]
     public int Id { get; set; }
 
-    public string NazivGreske { get; set; }
-
-    public int? IdZip { get; set; }
-
-    [Column(TypeName = "datetime")]
-    public DateTime? SistemskiDatum { get; set; }
-
-    public int? Sredjeno { get; set; }
-
-    [StringLength(500)]
-    public string Komentar { get; set; }
-
-    public int? IdMetoda { get; set; }
+    [StringLength(50)]
+    [Unicode(false)]
+    public string Metoda { get; set; }
 }

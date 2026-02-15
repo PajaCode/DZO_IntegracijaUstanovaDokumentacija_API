@@ -1,4 +1,6 @@
-﻿using DZO_IntegracijaUstanovaDokumentacija_API.Helpers;
+﻿using DZO_IntegracijaUstanovaDokumentacija_API.Api;
+using DZO_IntegracijaUstanovaDokumentacija_API.Errors;
+using DZO_IntegracijaUstanovaDokumentacija_API.Helpers;
 using DZO_IntegracijaUstanovaDokumentacija_API.Models.DataTransferObjects;
 using DZO_IntegracijaUstanovaDokumentacija_API.Models.DomainClasses;
 using HR_API.Helpers;
@@ -21,6 +23,7 @@ namespace DZO_IntegracijaUstanovaDokumentacija_API.Managers
         private readonly GlobosSftpService _sftpService;
         private readonly RazmenaDokumentacijeDb_Context _db;
         private readonly Logovi _logger;
+
         public SpecifikacijaManager(GlobosSftpService sftpService, RazmenaDokumentacijeDb_Context db, Logovi logger)
         {
             _sftpService = sftpService;
@@ -28,32 +31,41 @@ namespace DZO_IntegracijaUstanovaDokumentacija_API.Managers
             _logger = logger;
         }
 
-        public void UpisiJsone()
+        // IdMetoda = 1
+        public OperationSummary UpisiJsone()
         {
-            var sb = new StringBuilder();
+            var summary = new OperationSummary { Message = "Upis JSON fajlova završen." };
+
             var listaFajlova = _sftpService.ListaJsona();
+            summary = summary with { Total = listaFajlova.Count };
+
+            var sb = new StringBuilder();
 
             using (_sftpService.ConnectScope())
             {
-                listaFajlova.ForEach(file =>
+                foreach (var file in listaFajlova)
                 {
-                    var zaPretragu = file.Substring(0, file.IndexOf('.'));
-                    var existsCount = _db.DZOI_Vizim_Json.Count(x => x.nazivJson.Contains(zaPretragu) && x.StatusId == 2);
+                    try
+                    {
+                        var baseName = Path.GetFileNameWithoutExtension(file);
+                        var existsCount = _db.DZOI_Vizim_Json.Count(x => x.nazivJson.Contains(baseName) && x.StatusId == 2);
 
-                    if (existsCount == 0)
-                    {
-                        _db.DZOI_Vizim_Json.Add(new DZOI_Vizim_Json
+                        if (existsCount == 0)
                         {
-                            nazivJson = file,
-                            StatusId = 1,
-                            SistemskiDatum = DateTime.Now
-                        });
-                        _db.SaveChanges();
-                    }
-                    else
-                    {
+                            _db.DZOI_Vizim_Json.Add(new DZOI_Vizim_Json
+                            {
+                                nazivJson = file,
+                                StatusId = 1,
+                                SistemskiDatum = DateTime.Now
+                            });
+                            _db.SaveChanges();
+                            summary.Succeeded++;
+                            continue;
+                        }
+
+                        // rename duplikat na SFTP
                         sb.Clear();
-                        sb.Append(file).Replace(".JSON", "").Append('_').Append(existsCount).Append(".JSON");
+                        sb.Append(baseName).Append('_').Append(existsCount).Append(Path.GetExtension(file));
 
                         var root = _sftpService.VratiPutanju();
                         _sftpService._sftpClient.RenameFile($"{root}/{file}", $"{root}/{sb}");
@@ -65,74 +77,106 @@ namespace DZO_IntegracijaUstanovaDokumentacija_API.Managers
                             SistemskiDatum = DateTime.Now
                         });
                         _db.SaveChanges();
+
+                        summary.Succeeded++;
                     }
-                });
+                    catch (Exception ex)
+                    {
+                        summary.Failed++;
+                        summary.Errors.Add(new ItemError(null, null, file, ex.Message));
+                    }
+                }
             }
+
+            var status = summary.Failed == 0 ? ApiExecutionStatus.Succeeded : ApiExecutionStatus.CompletedWithErrors;
+            return summary with { Status = status };
         }
 
-        public async Task ParsirajIinsertujAsync()
+        // IdMetoda = 2
+        public async Task<OperationSummary> ParsirajIInsertujAsync()
         {
+            var summary = new OperationSummary { Message = "Parsiranje i upis specifikacije završen." };
+
             var rezultat = _db.DZOI_Vizim_Json.Where(x => x.StatusId == 1).ToList();
+            summary = summary with { Total = rezultat.Count };
+
             var settings = new JsonSerializerSettings
             {
                 Culture = CultureInfo.GetCultureInfo("sr-Latn-RS")
             };
 
-            try
+            foreach (var jsonRow in rezultat)
             {
+                var idJson = jsonRow.Id;
+                var naziv = jsonRow.nazivJson;
 
-                foreach (var rezultatItem in rezultat)
+                try
                 {
-                    string nazivString = new string(rezultatItem.nazivJson);
+                    var sadrzajFajla = _sftpService.UzmiSadrzajFajla(naziv);
 
-                    string sadrzajFajla = _sftpService.UzmiSadrzajFajla(nazivString);
-                    _sftpService.Disconnect();
-
+                    FileJson? jsonObject;
                     try
                     {
-
-                        var jsonObject = JsonConvert.DeserializeObject<FileJson>(sadrzajFajla, settings);
-
-                        if (jsonObject is null)
-                        {
-                            _logger.LogError(rezultatItem.Id, "Izabrani JSON je prazan.", 0, 2);
-                            continue;
-                        }
-                        else
-                        {
-                            try
-                            {
-                                _ = await InsertPodatakaIzJsona(jsonObject, rezultatItem);
-                                _logger.AzurirajStatusVizimJson(rezultatItem.Id, 2);
-                            }
-                            catch (Exception ex)
-                            {
-
-                                _logger.LogError(rezultatItem.Id, ex.Message + "metoda parsirajIinsertuj - insert", 0, 2);
-                                continue;
-                            }
-                        }
-
+                        jsonObject = JsonConvert.DeserializeObject<FileJson>(sadrzajFajla, settings);
                     }
                     catch (Exception ex)
                     {
-
-                        _logger.LogError(rezultatItem.Id, ex.Message + "metoda parsirajIinsertuj - parsiranje JSON-a", 0, 2);
+                        _logger.LogError(idJson, ex.Message + " - parsiranje JSON-a", 0, 2);
+                        summary.Failed++;
+                        summary.Errors.Add(new ItemError(idJson, null, naziv, "Greška parsiranja JSON-a: " + ex.Message));
                         continue;
                     }
 
+                    if (jsonObject is null)
+                    {
+                        _logger.LogError(idJson, "Izabrani JSON je prazan.", 0, 2);
+                        summary.Failed++;
+                        summary.Errors.Add(new ItemError(idJson, null, naziv, "JSON je prazan"));
+                        continue;
+                    }
+
+                    // insert
+                    List<DZOI_InsertSpecifikacijeRacunaFajlovaResult> spResult;
+                    try
+                    {
+                        spResult = await InsertPodatakaIzJsona(jsonObject, jsonRow);
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogError(idJson, ex.Message + " - insert", 0, 2);
+                        summary.Failed++;
+                        summary.Errors.Add(new ItemError(idJson, null, naziv, "Greška inserta: " + ex.Message));
+                        continue;
+                    }
+
+                    var first = spResult?.FirstOrDefault();
+                    if (first is null || first.Status != 1)
+                    {
+                        var poruka = first?.Poruka ?? "Neuspeh (bez poruke iz procedure)";
+                        _logger.LogError(idJson, poruka, 0, 2);
+                        summary.Failed++;
+                        summary.Errors.Add(new ItemError(idJson, null, naziv, poruka));
+                        continue;
+                    }
+
+                    _logger.AzurirajStatusVizimJson(idJson, 2);
+                    summary.Succeeded++;
+                }
+                catch (Exception ex)
+                {
+                    // neočekivano po jednom JSON-u (i dalje nastavljamo dalje)
+                    _logger.LogError(idJson, ex.Message + " - neočekivana greška", 0, 2);
+                    summary.Failed++;
+                    summary.Errors.Add(new ItemError(idJson, null, naziv, ex.Message));
                 }
             }
-            catch (Exception ex)
-            {
-                Console.WriteLine("Greška: " + ex.Message);
-                throw;
-            }
+
+            var status = summary.Failed == 0 ? ApiExecutionStatus.Succeeded : ApiExecutionStatus.CompletedWithErrors;
+            return summary with { Status = status };
         }
 
-        public async Task<List<DZOI_InsertSpecifikacijeRacunaFajlovaResult>> InsertPodatakaIzJsona(FileJson fileJson, DZOI_Vizim_Json json)
+        private async Task<List<DZOI_InsertSpecifikacijeRacunaFajlovaResult>> InsertPodatakaIzJsona(FileJson fileJson, DZOI_Vizim_Json json)
         {
-
             DataTable specifikacija = new();
             DataTable racun = new();
             DataTable stavka = new();
@@ -140,7 +184,7 @@ namespace DZO_IntegracijaUstanovaDokumentacija_API.Managers
             List<string> listaFajlova = new();
             string opisJson = JsonConvert.SerializeObject(fileJson);
 
-            ZaglavljeTable zaglavljeTable = new ZaglavljeTable
+            var zaglavljeTable = new ZaglavljeTable
             {
                 IdJson = json.Id,
                 FakturaId = fileJson.Zaglavlje.FakturaId,
@@ -149,23 +193,18 @@ namespace DZO_IntegracijaUstanovaDokumentacija_API.Managers
                 Datum = fileJson.Zaglavlje.Datum,
                 OpisJson = opisJson
             };
-            specifikacija = FormatTypeHelper.ToDataTableFromObject(zaglavljeTable);
+            specifikacija = HR_API.Helpers.FormatTypeHelper.ToDataTableFromObject(zaglavljeTable);
 
             List<RacunTable> racuni = new();
             List<StavkaTable> stavke = new();
             List<FajloviTable> fajlovi = new();
+
             foreach (Racun rac in fileJson.Racun)
             {
-                if (!String.IsNullOrEmpty(rac.RacunFajl))
-                {
-                    listaFajlova.Add(rac.RacunFajl);
-                }
-                if (!String.IsNullOrEmpty(rac.UputFajl))
-                {
-                    listaFajlova.Add(rac.UputFajl);
-                }
+                if (!string.IsNullOrEmpty(rac.RacunFajl)) listaFajlova.Add(rac.RacunFajl);
+                if (!string.IsNullOrEmpty(rac.UputFajl)) listaFajlova.Add(rac.UputFajl);
 
-                RacunTable racunTable = new RacunTable
+                racuni.Add(new RacunTable
                 {
                     RacunID = rac.RacunID,
                     RacunDatum = rac.RacunDatum,
@@ -177,27 +216,15 @@ namespace DZO_IntegracijaUstanovaDokumentacija_API.Managers
                     Popust = rac.Popust,
                     RacunFajl = rac.RacunFajl,
                     UputFajl = rac.UputFajl,
-                };
-                racuni.Add(racunTable);
+                });
 
                 foreach (Stavka stav in rac.Stavka)
                 {
+                    if (!string.IsNullOrEmpty(stav.LabNalazFajl)) listaFajlova.Add(stav.LabNalazFajl);
+                    if (!string.IsNullOrEmpty(stav.NalazFajl)) listaFajlova.Add(stav.NalazFajl);
+                    if (!string.IsNullOrEmpty(stav.Nalazsistematski)) listaFajlova.Add(stav.Nalazsistematski);
 
-                    if (!String.IsNullOrEmpty(stav.LabNalazFajl))
-                    {
-                        listaFajlova.Add(stav.LabNalazFajl);
-                    }
-                    if (!String.IsNullOrEmpty(stav.NalazFajl))
-                    {
-                        listaFajlova.Add(stav.NalazFajl);
-                    }
-                    if (!String.IsNullOrEmpty(stav.Nalazsistematski))
-                    {
-                        listaFajlova.Add(stav.Nalazsistematski);
-                    }
-
-
-                    StavkaTable stavkaTable = new StavkaTable
+                    stavke.Add(new StavkaTable
                     {
                         StavkaID = stav.StavkaID,
                         UslugaDatum = stav.UslugaDatum,
@@ -213,30 +240,27 @@ namespace DZO_IntegracijaUstanovaDokumentacija_API.Managers
                         Nalazsistematski = stav.Nalazsistematski,
                         UslugaNaziv = stav.UslugaNaziv,
                         RacunId = rac.RacunID
-                    };
-                    stavke.Add(stavkaTable);
-                    if (!String.IsNullOrEmpty(stav.Attachments))
+                    });
+
+                    if (!string.IsNullOrEmpty(stav.Attachments))
                     {
                         string[] attachments = stav.Attachments.Split(";");
                         foreach (string attachment in attachments)
                         {
                             listaFajlova.Add(attachment);
-                            FajloviTable fajloviTable = new FajloviTable
-                            {
-                                NazivFajla = attachment
-                            };
-                            fajlovi.Add(fajloviTable);
+                            fajlovi.Add(new FajloviTable { NazivFajla = attachment });
                         }
                     }
                 }
-
             }
 
+            // baca exception + premesti JSON u /GRESKA/ ako neki PDF fali
             _sftpService.PostojiFajl(listaFajlova, json.nazivJson);
 
-            racun = FormatTypeHelper.ToDataTableFromList(racuni);
-            stavka = FormatTypeHelper.ToDataTableFromList(stavke);
-            fajl = FormatTypeHelper.ToDataTableFromList(fajlovi);
+            racun = HR_API.Helpers.FormatTypeHelper.ToDataTableFromList(racuni);
+            stavka = HR_API.Helpers.FormatTypeHelper.ToDataTableFromList(stavke);
+            fajl = HR_API.Helpers.FormatTypeHelper.ToDataTableFromList(fajlovi);
+
             return await _db.Procedures.DZOI_InsertSpecifikacijeRacunaFajlovaAsync(specifikacija, racun, stavka, fajl);
         }
     }

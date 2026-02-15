@@ -39,8 +39,4 @@ public partial class DZOI_Vizim_Specifikacija
     [ForeignKey("IdJson")]
     [InverseProperty("DZOI_Vizim_Specifikacija")]
     public virtual DZOI_Vizim_Json IdJsonNavigation { get; set; }
-
-    [ForeignKey("StatusId")]
-    [InverseProperty("DZOI_Vizim_Specifikacija")]
-    public virtual DZOI_Status Status { get; set; }
 }

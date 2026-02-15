@@ -1,40 +1,23 @@
-using System;
+﻿using DZO_IntegracijaUstanovaDokumentacija_API.Errors;
 using DZO_IntegracijaUstanovaDokumentacija_API.Helpers;
+using DZO_IntegracijaUstanovaDokumentacija_API.Managers;
 using DZO_IntegracijaUstanovaDokumentacija_API.Models.DataTransferObjects;
-using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Configuration (koristi ugra?eni builder.Configuration)
 var configuration = builder.Configuration;
 
-// Connection string: fail-fast ako nedostaje
 var defaultConnectionString = configuration.GetConnectionString("DefaultConnection")
     ?? throw new InvalidOperationException("Missing connection string 'DefaultConnection' in appsettings");
 
-// DbContext pool + SQL retry + detalji u Dev
 builder.Services.AddDbContextPool<RazmenaDokumentacijeDb_Context>(options =>
 {
     options.UseSqlServer(defaultConnectionString, sql =>
-    {
-        sql.EnableRetryOnFailure(
-            maxRetryCount: 5,
-            maxRetryDelay: TimeSpan.FromSeconds(10),
-            errorNumbersToAdd: null);
-    });
-
-    if (builder.Environment.IsDevelopment())
-    {
-        options.EnableDetailedErrors();
-        options.EnableSensitiveDataLogging();
-    }
+        sql.EnableRetryOnFailure(5, TimeSpan.FromSeconds(10), null));
 });
 
-// Options binding + validacija na startu
+// options
 builder.Services.AddOptions<GlobosSftpSetting>()
     .Bind(configuration.GetSection("GlobosSftpSettings"))
     .ValidateDataAnnotations()
@@ -45,19 +28,15 @@ builder.Services.AddOptions<CorisSftpSetting>()
     .ValidateDataAnnotations()
     .ValidateOnStart();
 
-builder.Services.AddOptions<MediGroupSftpSettings>()
-    .Bind(configuration.GetSection("MediGroupSftpSettings"))
-    .ValidateDataAnnotations()
-    .ValidateOnStart();
-
-// SFTP servisi: Transient (ili Scoped) � bez Singleton
+// services
 builder.Services.AddTransient<GlobosSftpService>();
 builder.Services.AddTransient<CorisSftpService>();
-builder.Services.AddTransient<MediGroupSftpService>();
-
 builder.Services.AddScoped<Logovi>();
 
-// Controllers + JSON
+builder.Services.AddScoped<SpecifikacijaManager>();
+builder.Services.AddScoped<PrebacivanjeFajlovaManager>();
+builder.Services.AddScoped<PrebacivanjeFolderaCorisuManager>();
+
 builder.Services.AddControllers().AddJsonOptions(o =>
 {
     o.JsonSerializerOptions.PropertyNameCaseInsensitive = true;
@@ -68,24 +47,29 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddHttpContextAccessor();
 
+// 👇 OVO JE KLJUČ
 builder.Services.AddProblemDetails();
+builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
+
 builder.Services.AddHealthChecks();
 
 var app = builder.Build();
 
-app.UseExceptionHandler(_ => { /* ProblemDetails ?e generisati telo */ });
-
+// 👇 u DEV koristi developer page, u PROD global handler
 if (app.Environment.IsDevelopment())
 {
     app.UseDeveloperExceptionPage();
     app.UseSwagger();
-    app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "Your API V1"));
+    app.UseSwaggerUI();
+}
+else
+{
+    app.UseExceptionHandler(); // koristi GlobalExceptionHandler
 }
 
 app.UseRouting();
 app.UseAuthorization();
 
 app.MapControllers();
-app.MapHealthChecks("/health");
 
 app.Run();

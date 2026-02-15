@@ -1,4 +1,6 @@
-﻿using DZO_IntegracijaUstanovaDokumentacija_API.Helpers;
+﻿using DZO_IntegracijaUstanovaDokumentacija_API.Api;
+using DZO_IntegracijaUstanovaDokumentacija_API.Errors;
+using DZO_IntegracijaUstanovaDokumentacija_API.Helpers;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -8,31 +10,18 @@ namespace DZO_IntegracijaUstanovaDokumentacija_API.Controllers
     [ApiController]
     public class PrebacivanjeFolderaCorisuController : ControllerBase
     {
-        private readonly GlobosSftpService _sftpService;
-        private readonly CorisSftpService _sftpServiceCor;
-        private readonly RazmenaDokumentacijeDb_Context _db;
-        private readonly Logovi _logger;
-        public PrebacivanjeFolderaCorisuController(GlobosSftpService sftpService, CorisSftpService sftpServiceCor, RazmenaDokumentacijeDb_Context db, Logovi logger)
-        {
-            _sftpService = sftpService;
-            _sftpServiceCor = sftpServiceCor;
-            _db = db;
-            _logger = logger;   
-        }
-        [HttpGet("prebaciFoldere")]
-        public IActionResult PrebaciFoldere()
-        {
-            try
-            {
-                PrebacivanjeFolderaCorisuManager manager = new(_sftpService,_sftpServiceCor,_db, _logger);
-                manager.PrebaciFoldere();
-                return Ok();
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, $"prebacivanje foldera: {ex.Message}");
-            }
+        private readonly PrebacivanjeFolderaCorisuManager _manager;
 
+        public PrebacivanjeFolderaCorisuController(PrebacivanjeFolderaCorisuManager manager)
+        {
+            _manager = manager;
+        }
+
+        [HttpGet("prebaciFoldere")]
+        public ActionResult<ApiResponse<OperationSummary>> PrebaciFoldere()
+        {
+            var summary = _manager.PrebaciFoldere();
+            return Ok(ApiResponse<OperationSummary>.FromOperation(HttpContext, summary));
         }
     }
 }

@@ -73,30 +73,5 @@ namespace DZO_IntegracijaUstanovaDokumentacija_API.Helpers
                 .ForEach(red => red.StatusId = status);
             _db.SaveChanges();
         }
-
-        public void AzurirajsStatusZipa(int idZip, int status)
-        {
-            var redovi = _db.DZOI_MediGroup_Zip.Where(mg => mg.Id == idZip).ToList();
-            foreach (var red in redovi)
-            {
-                red.StatusId = status;
-                red.DatumPrebacivanja = DateTime.Now;
-            }
-            _db.SaveChanges();
-        }
-
-        public void LogErrorZip(int fileId, string error)
-        {
-            var zip = _db.DZOI_MediGroup_Zip.FirstOrDefault(j => j.Id == fileId);
-            if (zip != null) zip.StatusId = 3;
-
-            _db.DZOI_MediGroup_ErrorZip.Add(new DZOI_MediGroup_ErrorZip
-            {
-                NazivGreske = error,
-                IdZip = fileId,
-                IdMetoda = 6
-            });
-            _db.SaveChanges();
-        }
     }
 }
